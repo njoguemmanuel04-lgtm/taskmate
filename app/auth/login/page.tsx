@@ -1,0 +1,1 @@
+export default function Login(){ return <div className="p-10 max-w-md mx-auto"><h1 className="text-3xl font-black">Log In</h1><input placeholder="Email" className="w-full border p-3 rounded-xl mt-4"/><button className="w-full bg-blue-600 text-white py-3 rounded-full font-bold mt-4">Log In</button><a href="/" className="block text-center mt-4">Back Home</a></div> }
