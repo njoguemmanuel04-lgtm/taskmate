@@ -1,0 +1,1 @@
+export default function Workers(){ return <div className="p-10 text-center"><h1 className="text-3xl font-black">Verified Workers</h1><p>Trusted Kenyan professionals</p><a href="/" className="mt-6 inline-block bg-blue-900 text-white px-6 py-2 rounded-full">Back Home</a></div> }
