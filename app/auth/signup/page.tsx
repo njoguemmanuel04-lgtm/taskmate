@@ -1,0 +1,1 @@
+export default function Signup(){ return <div className="p-10 max-w-md mx-auto"><h1 className="text-3xl font-black">Sign Up</h1><input placeholder="Full Name" className="w-full border p-3 rounded-xl mt-4"/><button className="w-full bg-yellow-400 py-3 rounded-full font-black mt-4">Create Account</button><a href="/" className="block text-center mt-4">Back Home</a></div> }
