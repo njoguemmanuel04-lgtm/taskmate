@@ -1,76 +1,116 @@
-"use client"
-import Link from "next/link"
+"use client";
+import { useState } from "react";
 
-export default function Home(){
-  const categories=[
-    {name:"Cleaning", icon:"🧹", bg:"bg-green-500"},
-    {name:"Delivery", icon:"🚚", bg:"bg-orange-500"},
-    {name:"Repairs", icon:"🔧", bg:"bg-red-500"},
-    {name:"Plumbing", icon:"💧", bg:"bg-blue-500"},
-    {name:"Construction", icon:"👷", bg:"bg-purple-600"},
-    {name:"Outside Catering", icon:"👨‍🍳", bg:"bg-yellow-500"},
-  ]
+export default function Home() {
+  const [search, setSearch] = useState("");
 
-  return(
-    <div className="min-h-screen bg-[#f0f3f8] pb-24">
-      {/* HEADER - Same as your screenshot */}
-      <div className="bg-[#0f2a54] text-white p-5 rounded-b-[30px]">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="bg-yellow-400 p-2 rounded-xl text-xl">🏠🔧</div>
-            <h1 className="font-black text-xl">Task<span className="text-yellow-400">Mate</span></h1>
-          </div>
-          <div className="flex gap-2 items-center">
-            <Link href="/subscription" className="bg-white/20 px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1">
-              💰 KES 50
-            </Link>
-            <div className="bg-white/20 p-2 rounded-full">🔔</div>
+  const go = (path: string) => {
+    window.location.href = path;
+  };
+
+  const handleSearch = () => {
+    if (search.trim()) go(`/jobs?search=${search}`);
+    else go('/jobs');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* HEADER */}
+      <div className="bg-white p-4 flex justify-between items-center shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">T</div>
+          <div>
+            <p className="font-bold text-blue-600 leading-none">Taskmate</p>
+            <p className="text-xs text-gray-500">Nairobi, Kenya</p>
           </div>
         </div>
-
-        <p className="text-white/60 mt-6 text-sm">Good morning,</p>
-        <h2 className="font-black text-2xl">Emmanuel</h2>
-        <p className="text-white/60 text-sm">Find the right help. Get it done.</p>
-
-        <div className="bg-white rounded-full flex items-center p-3 mt-5 gap-2">
-          <span>🔍</span>
-          <input placeholder="Search for a service or job..." className="flex-1 text-black outline-none text-sm" />
-          <span className="bg-gray-100 rounded-full w-7 h-7 flex items-center justify-center text-xs">X</span>
+        <div className="flex gap-2">
+          <button onClick={()=>go('/messages')} className="text-gray-600">💬</button>
+          <button onClick={()=>go('/profile')} className="text-gray-600">👤</button>
         </div>
       </div>
 
-      {/* BANNER */}
-      <div className="mx-4 -mt-2 bg-gradient-to-r from-[#0f2a54] to-[#3b82f6] rounded-[20px] p-5 text-white">
-        <h3 className="font-black text-lg leading-tight">Trusted Services<br/>Across Kenya</h3>
-        <p className="text-white/70 text-[11px] mt-1">Skilled workers • Reliable clients • Secure payments</p>
-        <Link href="/post" className="inline-block bg-white text-[#0f2a54] text-sm font-bold px-4 py-2 rounded-full mt-4">+ Post a Job</Link>
+      {/* SEARCH */}
+      <div className="p-4 bg-white">
+        <div className="flex gap-2">
+          <input 
+            value={search}
+            onChange={(e)=>setSearch(e.target.value)}
+            placeholder="Search for any service..."
+            className="flex-1 p-3 bg-gray-100 rounded-xl outline-none"
+            onKeyDown={(e)=> e.key==='Enter' && handleSearch()}
+          />
+          <button onClick={handleSearch} className="bg-blue-600 text-white px-5 rounded-xl">🔍</button>
+        </div>
       </div>
 
-      {/* CATEGORIES - Same as screenshot */}
+      {/* POST A JOB BANNER - BUTTON FIXED */}
       <div className="p-4">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="font-black">Popular Categories</h3>
-          <Link href="/categories" className="text-blue-600 text-sm font-bold">See All ›</Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          {categories.map((c)=>(
-            <div key={c.name} className="bg-white rounded-2xl p-5 text-center border">
-              <div className={`${c.bg} w-12 h-12 rounded-xl flex items-center justify-center text-xl mx-auto`}>{c.icon}</div>
-              <p className="font-bold text-sm mt-3">{c.name}</p>
-            </div>
-          ))}
+        <div onClick={()=>go('/post-job')} className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-5 text-white flex justify-between items-center cursor-pointer">
+          <div>
+            <h2 className="font-bold text-lg">Post a Job</h2>
+            <p className="text-sm opacity-90">Find trusted local help in minutes</p>
+            <p className="mt-2 bg-white text-blue-600 px-3 py-1 rounded-full text-sm inline-block font-bold">Post now →</p>
+          </div>
+          <div className="text-4xl">👷</div>
         </div>
       </div>
 
-      {/* BOTTOM NAV - Same as screenshot */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3">
-        <span className="text-center text-xs font-bold">🏠<br/>Home</span>
-        <span className="text-center text-xs text-gray-400">💼<br/>Jobs</span>
-        <div className="bg-[#0f2a54] w-12 h-12 rounded-full flex items-center justify-center text-white text-2xl -mt-6">+</div>
-        <span className="text-center text-xs text-gray-400">💬<br/>Messages</span>
-        <Link href="/subscription" className="text-center text-xs text-gray-400">👤<br/>Profile</Link>
+      {/* CATEGORIES - ALL BUTTONS FIXED FOREVER */}
+      <div className="p-4 bg-white mt-2">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold">Popular Categories</h3>
+          <button onClick={()=>go('/jobs')} className="text-blue-600 text-sm">See All {'>'}</button>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <div onClick={()=>go('/jobs?category=Cleaning')} className="bg-gray-50 p-4 rounded-xl text-center cursor-pointer hover:bg-blue-50">
+            <div className="text-2xl mb-1">🧹</div><p className="text-sm font-medium">Cleaning</p>
+          </div>
+          <div onClick={()=>go('/jobs?category=Delivery')} className="bg-gray-50 p-4 rounded-xl text-center cursor-pointer hover:bg-blue-50">
+            <div className="text-2xl mb-1">📦</div><p className="text-sm font-medium">Delivery</p>
+          </div>
+          <div onClick={()=>go('/jobs?category=Repairs')} className="bg-gray-50 p-4 rounded-xl text-center cursor-pointer hover:bg-blue-50">
+            <div className="text-2xl mb-1">🔧</div><p className="text-sm font-medium">Repairs</p>
+          </div>
+          <div onClick={()=>go('/jobs?category=Plumbing')} className="bg-gray-50 p-4 rounded-xl text-center cursor-pointer hover:bg-blue-50">
+            <div className="text-2xl mb-1">🚿</div><p className="text-sm font-medium">Plumbing</p>
+          </div>
+          <div onClick={()=>go('/jobs?category=Construction')} className="bg-gray-50 p-4 rounded-xl text-center cursor-pointer hover:bg-blue-50">
+            <div className="text-2xl mb-1">🏗️</div><p className="text-sm font-medium">Construction</p>
+          </div>
+          <div onClick={()=>go('/jobs?category=Catering')} className="bg-gray-50 p-4 rounded-xl text-center cursor-pointer hover:bg-blue-50">
+            <div className="text-2xl mb-1">🍲</div><p className="text-sm text-xs font-medium">Outside Catering</p>
+          </div>
+        </div>
+      </div>
+
+      {/* TOP PROVIDERS LINK */}
+      <div className="p-4 bg-white mt-2">
+        <div className="flex justify-between items-center">
+          <h3 className="font-bold">Top Providers</h3>
+          <button onClick={()=>go('/providers')} className="text-blue-600 text-sm">See All {'>'}</button>
+        </div>
+        <div className="mt-3 p-4 bg-gray-50 rounded-xl text-center text-gray-500 text-sm">
+          Providers coming soon - Post a job to see workers!
+        </div>
+      </div>
+
+      {/* BOTTOM NAV - ALL BUTTONS FIXED FOREVER */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-2">
+        <button onClick={()=>go('/')} className="flex flex-col items-center text-blue-600">
+          <span>🏠</span><span className="text-xs font-bold">Home</span>
+        </button>
+        <button onClick={()=>go('/jobs')} className="flex flex-col items-center text-gray-500">
+          <span>💼</span><span className="text-xs">Jobs</span>
+        </button>
+        <button onClick={()=>go('/post-job')} className="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl -mt-4">+</button>
+        <button onClick={()=>go('/messages')} className="flex flex-col items-center text-gray-500">
+          <span>💬</span><span className="text-xs">Messages</span>
+        </button>
+        <button onClick={()=>go('/profile')} className="flex flex-col items-center text-gray-500">
+          <span>👤</span><span className="text-xs">Profile</span>
+        </button>
       </div>
     </div>
-  )
+  );
 }
