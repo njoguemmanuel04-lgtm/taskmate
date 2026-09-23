@@ -1,92 +1,93 @@
 "use client"
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
-export default function SuperAdminDashboard() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [realData] = useState({
-    totalUsers: 3, workers: 0, clients: 0, activeJobs: 0,
-    todayRevenue: 0, monthlyRevenue: 0, subscriptions: 0, completedJobs: 0,
-  });
+export default function Admin() {
+  const router = useRouter()
+  const [auth, setAuth] = useState(false)
+  const [pass, setPass] = useState("")
+  const [jobs, setJobs] = useState<any[]>([])
+  const [workers, setWorkers] = useState<any[]>([])
+  const ADMIN_PASS = "Mwea2026" // <-- YOUR SECRET PASSWORD
+  const mpesa = "0116982197"
 
-  const menuItems = [
-    { label: "Dashboard - REAL", icon: "🏠", href: "/admin", active: true, count: "" },
-    { label: "Users", icon: "👥", href: "/admin/users", count: "" },
-    { label: `Workers (${realData.workers} real)`, icon: "👷", href: "/workers", count: "" },
-    { label: "Jobs", icon: "💼", href: "/jobs", count: "" },
-    { label: "Find Fundi", icon: "🔍", href: "/", count: "" },
-  ];
+  useEffect(() => {
+    if (localStorage.getItem("admin_auth") === "yes") setAuth(true)
+    setJobs(JSON.parse(localStorage.getItem("workers") || "[]"))
+    setWorkers(JSON.parse(localStorage.getItem("workers") || "[]"))
+  }, [])
 
-  const stats = [
-    { label: "Total Users", value: realData.totalUsers.toString(), sub: "Tap to see users", color: "bg-blue-500", icon: "👥", link: "/admin/users" },
-    { label: "Workers", value: realData.workers.toString(), sub: realData.workers === 0? "No fundis - Tap to add!" : "Real fundis", color: "bg-green-600", icon: "👷", link: "/workers" },
-    { label: "Clients", value: realData.clients.toString(), sub: "Real clients", color: "bg-purple-600", icon: "👤", link: "/admin/users" },
-    { label: "Active Jobs", value: realData.activeJobs.toString(), sub: "Tap to see jobs", color: "bg-orange-500", icon: "💼", link: "/jobs" },
-    { label: "Today's Revenue", value: `KSh ${realData.todayRevenue}`, sub: "Real M-Pesa", color: "bg-green-500", icon: "$", link: "/admin" },
-    { label: "Monthly Revenue", value: `KSh ${realData.monthlyRevenue}`, sub: "This month", color: "bg-slate-900", icon: "📈", link: "/admin" },
-  ];
+  const login = () => {
+    if (pass === ADMIN_PASS) {
+      localStorage.setItem("admin_auth", "yes")
+      setAuth(true)
+    } else alert("❌ Wrong Password!")
+  }
+
+  const del = (i: number) => {
+    if (!confirm("Delete this job?")) return
+    const nw = jobs.filter((_, idx) => idx!== i)
+    setJobs(nw)
+    localStorage.setItem("workers", JSON.stringify(nw))
+  }
+
+  if (!auth) {
+    return (
+      <div className="min-h-screen bg-[#0f2a54] flex items-center justify-center p-6">
+        <div className="bg-white rounded-3xl p-8 w-full max-w-sm text-center">
+          <h1 className="font-black text-xl">🔒 Admin Lock</h1>
+          <p className="text-xs text-gray-500 mt-2">Enter password to access TaskMate Admin</p>
+          <input
+            type="password"
+            value={pass}
+            onChange={e=>setPass(e.target.value)}
+            placeholder="Password"
+            className="w-full mt-6 p-3 rounded-xl border text-center"
+          />
+          <button onClick={login} className="w-full mt-4 bg-[#0f2a54] text-white p-3 rounded-full font-bold">Unlock</button>
+          <p className="text-[10px] text-gray-400 mt-4">Hint: Mwea2026 • M-PESA: {mpesa}</p>
+          <button onClick={()=>router.push("/")} className="mt-4 text-xs">← Home</button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
-      {/* TOP BAR */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#0f172a] text-white p-4 flex justify-between items-center">
-        <button onClick={()=>setMenuOpen(true)} className="text-2xl">☰ 🤝 TaskMate</button>
-        <span className="text-sm">Emmanuel 👑</span>
+    <div className="min-h-screen bg-[#f5f7fa] p-4">
+      <div className="flex justify-between items-center">
+        <h1 className="font-black text-xl">👑 Admin Panel</h1>
+        <button onClick={()=>{
+          localStorage.removeItem("admin_auth")
+          setAuth(false)
+        }} className="bg-red-500 text-white px-3 py-1 rounded-full text-xs">Logout</button>
       </div>
 
-      {/* SIDEBAR - NOW CLICKABLE */}
-      <div className={`w-[280px] bg-[#0f172a] text-white p-4 flex flex-col fixed lg:static inset-y-0 left-0 z-40 transform transition-transform ${menuOpen? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:flex`}>
-        <div className="flex items-center gap-2 mb-8 px-2 mt-12 lg:mt-0">
-          <div className="text-3xl">🤝</div>
-          <div><h1 className="font-bold text-xl">TaskMate</h1><p className="text-xs text-white/60">REAL DATA MODE</p></div>
+      <div className="grid grid-cols-2 gap-3 mt-4">
+        <div className="bg-[#0f2a54] text-white p-4 rounded-2xl text-center">
+          <p className="text-2xl font-black">{jobs.length}</p>
+          <p className="text-xs opacity-70">Total Jobs</p>
         </div>
-
-        <div className="space-y-2">
-          {menuItems.map((item, i) => (
-            <Link key={i} href={item.href} onClick={()=>setMenuOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all active:scale-95 ${item.active? 'bg-blue-600 text-white font-bold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
-              <span>{item.icon}</span> {item.label}
-            </Link>
-          ))}
-          <button onClick={()=>setMenuOpen(false)} className="lg:hidden w-full mt-6 bg-white/10 py-3 rounded-lg active:bg-white/20">✕ Close Menu</button>
-        </div>
-
-        <div className="mt-auto bg-white/5 rounded-xl p-4 flex items-center gap-3">
-          <img src="https://i.pravatar.cc/100?img=12" className="w-10 h-10 rounded-full" />
-          <div><p className="font-bold text-sm">Emmanuel Njogu</p><p className="text-xs text-white/60">CEO / Super Admin</p><p className="text-[10px] text-green-400">● Online - Buttons Fixed</p></div>
+        <div className="bg-green-600 text-white p-4 rounded-2xl text-center">
+          <p className="text-2xl font-black">KES {jobs.length * 50}</p>
+          <p className="text-xs opacity-70">Earnings • {mpesa}</p>
         </div>
       </div>
 
-      {/* OVERLAY to close menu when tapping outside */}
-      {menuOpen && <div onClick={()=>setMenuOpen(false)} className="fixed inset-0 bg-black/50 z-30 lg:hidden"></div>}
-
-      {/* MAIN */}
-      <div className="flex-1 p-4 lg:p-6 mt-16 lg:mt-0">
-        <h1 className="text-xl font-bold">Welcome back, Emmanuel 👋</h1>
-        <p className="text-slate-500 text-sm mb-2">Real numbers - All buttons now clickable!</p>
-        <div className="bg-green-100 border border-green-300 p-3 rounded-lg text-sm mb-6">
-          ✅ FIXED: All menu buttons now PRESSABLE! Tap any card to go to that page.
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {stats.map((s, i) => (
-            <Link key={i} href={s.link} className="bg-white rounded-xl p-4 shadow-sm border flex gap-3 active:scale-[0.98] transition-all hover:shadow-md cursor-pointer">
-              <div className={`w-12 h-12 ${s.color} rounded-lg flex items-center justify-center text-white text-xl shrink-0`}>{s.icon}</div>
-              <div><p className="text-xs text-slate-500">{s.label}</p><p className="font-bold text-lg">{s.value}</p><p className="text-[11px] text-blue-600 underline">{s.sub} →</p></div>
-            </Link>
-          ))}
-        </div>
-
-        <div className="bg-white rounded-xl p-4 border">
-          <h3 className="font-bold mb-3">Quick Actions - TAP TO TEST:</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Link href="/workers" className="bg-blue-600 text-white py-3 rounded-lg text-center text-sm font-bold active:bg-blue-700">👷 View Workers</Link>
-            <Link href="/" className="bg-green-600 text-white py-3 rounded-lg text-center text-sm font-bold active:bg-green-700">🔍 Find Fundi</Link>
-            <button onClick={()=>alert('TaskMate: Real data mode - 0 workers because you deleted demo! Add real fundi from Mwea')} className="bg-slate-900 text-white py-3 rounded-lg text-sm font-bold">ℹ️ Why 0 Workers?</button>
-            <button onClick={()=>alert('Coming soon: Invite link')} className="bg-purple-600 text-white py-3 rounded-lg text-sm font-bold">📤 Share App</button>
+      <h2 className="font-bold mt-6">All Jobs / Fundis</h2>
+      <div className="space-y-3 mt-3">
+        {jobs.map((j:any,i:number)=>(
+          <div key={i} className="bg-white p-4 rounded-2xl border flex justify-between items-center">
+            <div>
+              <p className="font-bold text-sm">{j.name} - {j.skill}</p>
+              <p className="text-xs text-gray-500">{j.loc} • {j.phone}</p>
+            </div>
+            <button onClick={()=>del(i)} className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">Delete</button>
           </div>
-        </div>
+        ))}
+        {jobs.length===0 && <p className="text-center text-xs text-gray-400 mt-10">No jobs yet</p>}
       </div>
+
+      <button onClick={()=>router.push("/")} className="w-full mt-8 border p-3 rounded-full">← Back Home</button>
     </div>
-  );
+  )
 }
