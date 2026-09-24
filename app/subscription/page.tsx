@@ -1,35 +1,44 @@
-"use client"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-export default function Subscription(){
-const router=useRouter()
-const [loading,setLoading]=useState("")
-const mpesaNumber="0116982197"
-const plans=[
-{id:"daily",name:"Daily Try",price:50,days:"1 Day",color:"bg-gray-100 border",btn:"bg-gray-800",features:["Visible 24hrs","2-3 Calls"]},
-{id:"weekly",name:"Weekly Hustle",price:250,days:"7 Days",color:"bg-blue-50 border-2 border-blue-500",btn:"bg-blue-600",features:["Visible 7 days","TOP in search","15-20 Calls","Mwea+Ngurubani"],pop:true},
-{id:"monthly",name:"Monthly CEO",price:799,days:"30 Days",color:"bg-yellow-50 border-2 border-yellow-500",btn:"bg-[#0f2a54]",features:["Visible 30 days","ALWAYS TOP","80+ Calls","Verified badge","All Kirinyaga"],best:true},
-]
-const pay=(plan:any)=>{
-setLoading(plan.id)
-setTimeout(()=>{
-alert(`Lipa KES ${plan.price} to ${mpesaNumber}\nPlan: ${plan.name}\nAfter paying send screenshot to WhatsApp ${mpesaNumber}`)
-setLoading("")
-},600)
-}
-return(
-<div className="min-h-screen bg-[#f5f7fa] p-4">
-<div className="flex gap-3 items-center"><button onClick={()=>router.back()} className="bg-white p-2 rounded-full">←</button><h1 className="font-black text-xl">💰 Plans</h1></div>
-<p className="text-xs text-gray-500 mt-2">M-PESA: <b>{mpesaNumber}</b></p>
-<div className="space-y-4 mt-6">
-{plans.map((p:any)=>(
-<div key={p.id} className={`${p.color} rounded-3xl p-5`}>
-<div className="flex justify-between"><div><h3 className="font-black">{p.name}</h3><p className="text-xs text-gray-500">{p.days}</p></div><div className="text-right"><p className="font-black text-xl">KES {p.price}</p></div></div>
-<div className="mt-3">{p.features.map((f:string,i:number)=><p key={i} className="text-xs">✓ {f}</p>)}</div>
-<button onClick={()=>pay(p)} className={`w-full mt-4 ${p.btn} text-white p-3 rounded-full font-bold`}>{loading===p.id?"...":`Pay KES ${p.price} via M-Pesa`}</button>
-</div>
-))}
-</div>
-</div>
-)
+"use client";
+import { useState } from "react";
+
+export default function Subscription() {
+  const TILL = "1754910";
+  return (
+    <div className="min-h-screen bg-[#eef2f7] pb-24">
+      <div className="bg-[#0a1f44] text-white p-5">
+        <h1 className="font-black text-xl">My Subscription</h1>
+        <p className="text-xs opacity-80">TILL {TILL} - TaskMate Kenya</p>
+      </div>
+
+      <div className="p-4 space-y-4">
+        <div className="bg-gradient-to-r from-[#0a1f44] to-blue-600 text-white p-6 rounded-2xl text-center">
+          <div className="text-sm opacity-80">Current Balance</div>
+          <div className="text-4xl font-black mt-2">KES 50</div>
+          <div className="text-xs mt-2 bg-white/20 inline-block px-3 py-1 rounded-full">ACTIVE - Valid for 30 Days</div>
+          <button onClick={()=>window.location.href='/'} className="bg-white text-[#0a1f44] px-6 py-2 rounded-full font-black text-sm mt-4 block mx-auto">Go Home</button>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4">
+          <h3 className="font-black">What KES 50 Unlocks:</h3>
+          <div className="mt-3 space-y-2 text-sm">
+            <div>✅ Apply unlimited jobs</div>
+            <div>✅ Contact clients directly</div>
+            <div>✅ Post 3 jobs per month FREE</div>
+            <div>✅ Selling Land: Seller 500 / Buyer 300 / Broker FREE (Separate from KES 50)</div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 border-2 border-green-600">
+          <h3 className="font-black text-green-700">Top Up Subscription</h3>
+          <p className="text-xs mt-1">Pay to TILL {TILL}</p>
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <button className="bg-[#0a1f44] text-white p-3 rounded-xl font-bold">KES 50<br/><span className="text-[10px]">1 Month</span></button>
+            <button className="bg-green-600 text-white p-3 rounded-xl font-bold">KES 120<br/><span className="text-[10px]">3 Months</span></button>
+            <button className="bg-yellow-500 text-black p-3 rounded-xl font-bold">KES 400<br/><span className="text-[10px]">1 Year</span></button>
+          </div>
+          <div className="text-center text-[11px] mt-3 font-bold">Lipa na M-Pesa -&gt; Buy Goods -&gt; TILL {TILL} -&gt; KES 50</div>
+        </div>
+      </div>
+    </div>
+  );
 }
