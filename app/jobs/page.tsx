@@ -1,37 +1,22 @@
 "use client";
+import {useEffect,useState} from "react";
 export default function Jobs(){
- const go = (p:string) => location.href=p;
- const handleApply = (job:string) => {
-   const sub = localStorage.getItem("subscribed");
-   if(sub !== "true"){
-     if(confirm("To apply for "+job+"\n\nYou need subscription KES 50/week\n\nGo to subscription?")){
-       go('/subscription');
-     }
-     return;
-   }
-   alert("✅ Applied for "+job+"\nClient will contact you!");
- };
- return(
- <div className="min-h-screen bg-[#eef2f7] p-5">
-   <div className="flex gap-3 mb-4">
-     <button onClick={()=>go('/')} className="bg-white w-9 h-9 rounded-full">←</button>
-     <h1 className="font-bold text-xl">Available Jobs</h1>
-   </div>
-   <div className="bg-white rounded-xl p-4 mb-3">
-     <p className="font-bold">House Cleaning - Westlands</p>
-     <p className="text-xs text-gray-500">KES 2,500 • 2 hrs ago</p>
-     <button onClick={()=>handleApply('House Cleaning')} className="mt-2 bg-[#0a1f44] text-white px-4 py-2 rounded-full text-xs">Apply</button>
-   </div>
-   <div className="bg-white rounded-xl p-4 mb-3">
-     <p className="font-bold">Plumbing Fix - Karen</p>
-     <p className="text-xs text-gray-500">KES 1,500 • 5 hrs ago</p>
-     <button onClick={()=>handleApply('Plumbing Fix')} className="mt-2 bg-[#0a1f44] text-white px-4 py-2 rounded-full text-xs">Apply</button>
-   </div>
-   <div className="bg-white rounded-xl p-4">
-     <p className="font-bold">Delivery - CBD</p>
-     <p className="text-xs text-gray-500">KES 800 • 1 day ago</p>
-     <button onClick={()=>handleApply('Delivery')} className="mt-2 bg-[#0a1f44] text-white px-4 py-2 rounded-full text-xs">Apply</button>
-   </div>
- </div>
- );
+const [jobs,setJobs]=useState<any[]>([]);
+useEffect(()=>{
+const s=JSON.parse(localStorage.getItem("taskmate_jobs")||"[]");
+setJobs(s);
+},[]);
+return(
+<div style={{padding:16,background:"#eef2f7",minHeight:"100vh"}}>
+<div style={{display:"flex",alignItems:"center",gap:10}}><button onClick={()=>location.href='/'}>←</button><h1 style={{fontWeight:"bold",fontSize:20}}>Available Jobs - Kirinyaga</h1></div>
+{jobs.length===0&&<div style={{background:"white",padding:20,borderRadius:16,marginTop:16,textAlign:"center"}}><p>No jobs yet - Be first to post!</p><button onClick={()=>location.href='/post-job'} style={{background:"#0a1931",color:"white",padding:"10px 20px",borderRadius:20,marginTop:10}}>Post Job</button></div>}
+{jobs.map((j:any,i:number)=>(
+<div key={i} style={{background:"white",borderRadius:16,padding:16,marginTop:12}}>
+<h2 style={{fontWeight:"bold"}}>{j.title} - {j.location}</h2>
+<p style={{color:"gray",fontSize:13}}>KES {j.price} • {j.time} • {j.phone}</p>
+<button onClick={()=>window.open(`https://wa.me/254${j.phone.slice(1)}?text=Hi, naitaji ${j.title} ${j.location}`)} style={{background:"#0a1931",color:"white",padding:"8px 16px",borderRadius:20,marginTop:8}}>Apply via WhatsApp</button>
+</div>
+))}
+</div>
+)
 }
