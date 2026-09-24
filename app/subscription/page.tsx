@@ -1,26 +1,46 @@
 "use client";
+import {useState} from "react";
 export default function Plans(){
-return(<div style={{padding:16,background:"#f5f7fa",minHeight:"100vh"}}>
-<div><button onClick={()=>location.href='/'}>← Home</button><h1>💰 Plans</h1></div>
-<p>M-PESA: <b>0116982197</b></p>
+const [pay,setPay]=useState<any>(null);
+const mpesa="0116982197";
+const plans=[
+{t:"Daily Try",p:50,d:"1 Day",c:["Visible 24hrs","2-3 Calls"],bg:"white",b:""},
+{t:"Weekly Hustle",p:250,d:"7 Days",c:["Visible 7 days","TOP in search","15-20 Calls","Mwea+Ngurubani"],bg:"#e0f0ff",b:"2px solid blue"},
+{t:"Monthly CEO",p:799,d:"30 Days",c:["Visible 30 days","ALWAYS TOP","80+ Calls","Verified badge","All Kirinyaga"],bg:"#fff9db",b:"2px solid gold"},
+];
+return(
+<div style={{minHeight:"100vh",background:"#f5f7fa",padding:16,paddingBottom:80}}>
+<div style={{display:"flex",alignItems:"center",gap:8}}><button onClick={()=>location.href='/'}>←</button><h1>💰 Plans</h1></div>
+<p style={{marginTop:4}}>M-PESA: <b>{mpesa}</b></p>
 
-<div style={{background:"white",borderRadius:16,padding:16,marginTop:12}}>
-<h2>Daily Try - KES 50</h2><p>1 Day</p>
-<p>✓ Visible 24hrs</p><p>✓ 2-3 Calls</p>
-<button onClick={()=>alert('Pay 50 to 0116982197')} style={{width:"100%",background:"#0a1931",color:"white",padding:12,borderRadius:20,marginTop:8}}>Pay KES 50 via M-Pesa</button>
+{plans.map((x,i)=>(
+<div key={i} style={{background:x.bg,border:x.b||"1px solid #eee",borderRadius:16,padding:16,marginTop:12}}>
+<h2 style={{fontWeight:"bold"}}>{x.t} - KES {x.p}</h2><p style={{fontSize:12,color:"gray"}}>{x.d}</p>
+<div style={{marginTop:8}}>{x.c.map((c,j)=><p key={j}>✓ {c}</p>)}</div>
+<button onClick={()=>setPay(x)} style={{width:"100%",background:"#0a1931",color:"white",padding:12,borderRadius:20,marginTop:10,fontWeight:"bold"}}>Pay KES {x.p} via M-Pesa</button>
 </div>
+))}
 
-<div style={{background:"#e0f0ff",border:"2px solid blue",borderRadius:16,padding:16,marginTop:12}}>
-<h2>Weekly Hustle - KES 250</h2><p>7 Days</p>
-<p>✓ Visible 7 days</p><p>✓ TOP in search</p><p>✓ 15-20 Calls</p><p>✓ Mwea+Ngurubani</p>
-<button onClick={()=>alert('Pay 250 to 0116982197')} style={{width:"100%",background:"blue",color:"white",padding:12,borderRadius:20,marginTop:8}}>Pay KES 250 via M-Pesa</button>
+{pay && (
+<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"grid",placeItems:"center",padding:16,zIndex:50}}>
+<div style={{background:"white",borderRadius:20,padding:20,width:"100%",maxWidth:360}}>
+<h2 style={{fontWeight:"bold",textAlign:"center"}}>Pay KES {pay.p}</h2>
+<div style={{background:"#f5f7fa",borderRadius:12,padding:12,marginTop:12,textAlign:"center"}}>
+<p style={{fontSize:12}}>Send to</p><h1 style={{fontWeight:"bold",fontSize:22}}>{mpesa}</h1>
+<p style={{fontSize:12}}>Name: Emmanuel Njogu</p>
+<button onClick={()=>{navigator.clipboard.writeText(mpesa);alert('Copied '+mpesa)}} style={{background:"#e0f0ff",padding:"6px 12px",borderRadius:20,marginTop:8,fontSize:12}}>📋 Copy Number</button>
 </div>
-
-<div style={{background:"#fff9db",border:"2px solid gold",borderRadius:16,padding:16,marginTop:12}}>
-<h2>Monthly CEO - KES 799</h2><p>30 Days</p>
-<p>✓ Visible 30 days</p><p>✓ ALWAYS TOP</p><p>✓ 80+ Calls</p><p>✓ Verified badge</p><p>✓ All Kirinyaga</p>
-<button onClick={()=>alert('Pay 799 to 0116982197')} style={{width:"100%",background:"#0a1931",color:"white",padding:12,borderRadius:20,marginTop:8}}>Pay KES 799 via M-Pesa</button>
+<div style={{marginTop:12,fontSize:13,lineHeight:1.6}}>
+<p>1. M-Pesa → Send Money</p>
+<p>2. Enter: <b>{mpesa}</b></p>
+<p>3. Amount: <b>{pay.p}</b></p>
+<p>4. Enter PIN → Send</p>
 </div>
-
-</div>)
+<button onClick={()=>{window.open(`https://wa.me/254116982197?text=Hi, I paid KES ${pay.p} for ${pay.t}. My M-Pesa code is: `)}} style={{width:"100%",background:"#25D366",color:"white",padding:12,borderRadius:20,marginTop:12,fontWeight:"bold"}}>✅ I Have Paid - Verify on WhatsApp</button>
+<button onClick={()=>setPay(null)} style={{width:"100%",padding:10,marginTop:8,color:"gray"}}>Cancel</button>
+</div>
+</div>
+)}
+</div>
+)
 }
