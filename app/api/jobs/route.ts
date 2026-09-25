@@ -2,18 +2,23 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
-  'https://tvgbluiespttqwptpwljs.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2Z2JsdWllc3B0dHF3cHRwd2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NzA4MDcsImV4cCI6MjAwNTY0NjgwN30.Pmbgxx45ziJCtjrtt2eEzjDAbiVqzq4lqv0Qjn7iqoc'
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
-export async function GET() {
-  const { data } = await supabase.from('jobs').select('*').order('created_at', { ascending: false })
+export async function GET(){
+  const { data, error } = await supabase.from('jobs').select('*').order('created_at', {ascending:false})
+  if(error) return NextResponse.json({error: error.message}, {status:500})
   return NextResponse.json(data || [])
 }
 
-export async function POST(req: Request) {
-  const body = await req.json()
-  const { error } = await supabase.from('jobs').insert([body])
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-  return NextResponse.json({ success: true })
+export async function POST(req: Request){
+  try{
+    const body = await req.json()
+    const { data, error } = await supabase.from('jobs').insert([body]).select()
+    if(error) throw error
+    return NextResponse.json({success:true, data})
+  }catch(e:any){
+    return NextResponse.json({error: e.message}, {status:500})
+  }
 }
