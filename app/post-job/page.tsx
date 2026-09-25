@@ -1,23 +1,20 @@
-"use client";
-import {useState} from "react";
-export default function PostJob(){
-const [t,setT]=useState(""),[l,setL]=useState("Mwea"),[p,setP]=useState(""),[ph,setPh]=useState("");
-function post(){
-if(!t||!p)return alert("Fill title & price");
-const job={title:t,location:l,price:p,phone:ph||"0116982197",name:"Client",time:"Just now",id:Date.now()};
-const old=JSON.parse(localStorage.getItem("taskmate_jobs")||"[]");
-localStorage.setItem("taskmate_jobs",JSON.stringify([job,...old]));
-alert("Job Posted! Admin will see it now!");
-location.href="/jobs";
+"use client"
+import { supabase } from "@/lib/supabase"
+import { useState } from "react"
+export default function Post(){
+const [f,setF]=useState({title:"",location:"Mwea",price:"",phone:""})
+async function post(){
+if(!f.title||!f.price||!f.phone) return alert("Fill all fields")
+const {error}=await supabase.from("jobs").insert({title:f.title,location:f.location,price:f.price,phone:f.phone})
+if(error) alert(error.message)
+else {alert("✅ Posted to CLOUD! ☁️"); location.href="/jobs"}
 }
-return(
-<div style={{padding:20,minHeight:"100vh",background:"#f5f7fa"}}>
-<h1 style={{fontWeight:"bold"}}>Post Job - Kirinyaga</h1>
-<input placeholder="Job Title e.g Plumbing" value={t} onChange={e=>setT(e.target.value)} style={{width:"100%",padding:12,marginTop:12,borderRadius:12,border:"1px solid #ccc"}}/>
-<select value={l} onChange={e=>setL(e.target.value)} style={{width:"100%",padding:12,marginTop:8,borderRadius:12}}><option>Mwea</option><option>Ngurubani</option><option>Kerugoya</option><option>Kutus</option><option>Kagio</option></select>
-<input placeholder="Price KES" type="number" value={p} onChange={e=>setP(e.target.value)} style={{width:"100%",padding:12,marginTop:8,borderRadius:12,border:"1px solid #ccc"}}/>
-<input placeholder="Your Phone 011..." value={ph} onChange={e=>setPh(e.target.value)} style={{width:"100%",padding:12,marginTop:8,borderRadius:12,border:"1px solid #ccc"}}/>
-<button onClick={post} style={{width:"100%",background:"#0a1931",color:"white",padding:14,borderRadius:20,marginTop:12,fontWeight:"bold"}}>Post Job</button>
-</div>
-)
+return(<div style={{padding:16,maxWidth:400,margin:"0 auto"}}>
+<h1 style={{fontWeight:"bold",fontSize:20}}>Post Job - CLOUD ☁️</h1>
+<input placeholder="Title e.g Plumbing" onChange={e=>setF({...f,title:e.target.value})} style={{width:"100%",padding:12,marginTop:10,border:"1px solid #ccc",borderRadius:8}}/>
+<input placeholder="Location" defaultValue="Mwea" onChange={e=>setF({...f,location:e.target.value})} style={{width:"100%",padding:12,marginTop:10,border:"1px solid #ccc",borderRadius:8}}/>
+<input placeholder="Price e.g 2000" onChange={e=>setF({...f,price:e.target.value})} style={{width:"100%",padding:12,marginTop:10,border:"1px solid #ccc",borderRadius:8}}/>
+<input placeholder="Phone 07..." onChange={e=>setF({...f,phone:e.target.value})} style={{width:"100%",padding:12,marginTop:10,border:"1px solid #ccc",borderRadius:8}}/>
+<button onClick={post} style={{background:"#0a1931",color:"white",padding:14,width:"100%",marginTop:12,borderRadius:20,fontWeight:"bold"}}>POST TO CLOUD ☁️</button>
+</div>)
 }
