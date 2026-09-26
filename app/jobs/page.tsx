@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 export default function Jobs(){
   const [jobs,setJobs]=useState<any>([])
   const [loading,setLoading]=useState(true)
-  const [showMpesa, setShowMpesa] = useState<string|null>(null)
+  const [showMpesa, setShowMpesa] = useState<any>(null)
   const [payerPhone, setPayerPhone] = useState("")
 
   useEffect(()=>{
@@ -18,10 +18,10 @@ export default function Jobs(){
     return phone.slice(0,4) + "***" + phone.slice(-3)
   }
 
-  // SEND MONEY 0116982197 - MANUAL UNLOCK BY YOU
+  // SEND MONEY 0116982197 - MANUAL UNLOCK BY ADMIN
   async function iHavePaid(job:any){
     if(!payerPhone || payerPhone.length < 10){
-      alert("Enter your M-Pesa phone that sent 100")
+      alert("Enter your M-Pesa phone that sent 100 to 0116982197")
       return
     }
     const res = await fetch('/api/jobs', {
@@ -29,47 +29,50 @@ export default function Jobs(){
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: job.id,
-        payerphone: payerPhone, // LOWERCASE - fixes NULL!
-        pending: true,
-        pay: "100"
+        payerphone: payerPhone, // LOWERCASE - FIXED!
+        pending: true
       })
     })
     if(res.ok){
-      alert("Payment pending! Admin will verify your payment to 0116982197 and unlock for you.")
+      alert("Payment pending! Admin will verify your 100 to 0116982197 and unlock")
       setShowMpesa(null)
       setPayerPhone("")
-      window.location.reload()
-    } else {
-      alert("Failed, try again")
+      const d = await fetch('/api/jobs').then(r=>r.json())
+      setJobs(d)
     }
   }
 
-  if(loading) return <div>Loading...</div>
+  if(loading) return <div>Loading jobs...</div>
 
   return (
-    <div style={{padding:20}}>
-      <h1>Available Jobs</h1>
+    <div style={{padding:15}}>
+      <h3>Available Jobs</h3>
       {jobs.map((job:any)=>(
-        <div key={job.id} style={{border:'1px solid #ccc', padding:15, margin:10, borderRadius:8}}>
-          <h3>{job.title}</h3>
-          <p>{job.location} - KES {job.budget}</p>
-          <p>Client: {job.paid ? job.phone : maskPhone(job.phone) + " 🔒"}</p>
+        <div key={job.id} style={{border:'1px solid #ccc', padding:15, marginBottom:15, borderRadius:12}}>
+          <div>{job.title}</div>
+          <div>{job.location} - KES {job.budget}</div>
+          <div>Client: {job.paid ? `${job.client_name} - ${job.phone}` : `${maskPhone(job.phone)} 🔒`}</div>
+
           {job.paid ? (
-            <a href={`tel:${job.phone}`} style={{background:'green', color:'white', padding:10, borderRadius:5}}>Call {job.phone}</a>
+            <a href={`tel:${job.phone}`} style={{background:'green', color:'white', padding:10, display:'inline-block', marginTop:10, borderRadius:8, textDecoration:'none'}}>
+              Call {job.client_name} - {job.phone}
+            </a>
           ) : (
             <>
-              {showMpesa===job.id ? (
-                <div style={{background:'#f0f0f0', padding:10, marginTop:10}}>
-                  <p><b>SEND 100 to 0116982197</b></p>
-                  <p>After sending, enter M-Pesa phone:</p>
-                  <input value={payerPhone} onChange={e=>setPayerPhone(e.target.value)} placeholder="0725..." style={{padding:8, width:'100%'}} />
-                  <button onClick={()=>iHavePaid(job)} style={{background:'green', color:'white', padding:10, width:'100%', marginTop:8}}>I HAVE PAID 100 TO 0116982197</button>
-                </div>
-              ) : (
-                <button onClick={()=>setShowMpesa(job.id)} style={{background:'orange', padding:10}}>Unlock - KES 100</button>
-              )}
-              {job.pending && <p style={{color:'orange'}}>⏳ Pending verification by admin</p>}
+              <button onClick={()=>setShowMpesa(job)} style={{background:'orange', padding:10, marginTop:10, borderRadius:8}}>
+                Unlock - KES 100
+              </button>
+              {job.pending && <div style={{color:'orange', marginTop:8}}>⏳ Pending verification by admin</div>}
             </>
+          )}
+
+          {showMpesa?.id===job.id && (
+            <div style={{background:'#fff3cd', padding:15, marginTop:12, borderRadius:10}}>
+              <div>1. Send <b>KES 100</b> via <b>SEND MONEY</b> to <b>0116982197</b></div>
+              <div>2. Enter your number that sent money:</div>
+              <input value={payerPhone} onChange={e=>setPayerPhone(e.target.value)} placeholder="07xxxxxxxx" style={{width:'100%', padding:10, marginTop:8}} />
+              <button onClick={()=>iHavePaid(job)} style={{width:'100%', background:'green', color:'white', padding:12, marginTop:10, borderRadius:8}}>I HAVE PAID 100 TO 0116982197</button>
+            </div>
           )}
         </div>
       ))}
