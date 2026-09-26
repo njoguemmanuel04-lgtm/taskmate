@@ -21,14 +21,16 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   const body = await req.json()
-  const { id, payerphone, pending, paid, pay } = body
-
+  const id = body.id
+  const payerphone = body.payerphone || body.payerPhone
+  const pending = body.pending
+  const paid = body.paid
+  const pay = body.pay
   const updateData: any = {}
   if (payerphone!== undefined) updateData.payerphone = payerphone
   if (pending!== undefined) updateData.pending = pending
   if (paid!== undefined) updateData.paid = paid
   if (pay!== undefined) updateData.pay = pay
-
   const { data, error } = await supabase.from('jobs').update(updateData).eq('id', id).select()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data[0])
