@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 export default function Jobs(){
   const [jobs,setJobs]=useState<any>([])
   const [loading,setLoading]=useState(true)
-  const [unlocked, setUnlocked] = useState<any>({})
   const [showMpesa, setShowMpesa] = useState<string | null>(null)
   const [payerPhone, setPayerPhone] = useState("")
 
@@ -19,85 +18,89 @@ export default function Jobs(){
     return phone.slice(0,4) + "***" + phone.slice(-3)
   }
 
-  // NEW - SEND MONEY 0116982197 - MANUAL ADMIN UNLOCK
+  // SEND MONEY 0116982197 - MANUAL UNLOCK
   async function iHavePaid(job:any){
     if(!payerPhone || payerPhone.length < 10){
-      alert("Enter your M-Pesa phone that sent money to 0116982197, e.g 07XX...")
+      alert("Enter your M-Pesa phone that sent 100 to 0116982197, e.g 07XX...")
       return
     }
 
-    // Create pending payment
     await fetch(`/api/jobs?id=${job.id}`, {
       method: 'PUT',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ 
         pending: true, 
         payerPhone: payerPhone,
-        pendingTime: new Date().toISOString(),
+        pendingTime: new Date().toLocaleString(),
         paid: false
       })
     })
 
-    alert(`✅ Request sent!\n\nYou: ${payerPhone}\nSent: 100 to 0116982197\n\nAdmin will check M-Pesa SMS and unlock in 2 mins. Keep your M-Pesa message!\n\nIf you sent 50, you will be REJECTED - send 50 more!`)
+    alert(`✅ Sent!\nPayer: ${payerPhone}\nTo: 0116982197 - KES 100\n\nAdmin will check M-Pesa SMS and unlock. If you sent 50, you will be rejected!`)
     setShowMpesa(null)
     setPayerPhone("")
+    
+    // Refresh jobs
+    fetch('/api/jobs').then(r=>r.json()).then(setJobs)
   }
 
-  if(loading) return <div style={{padding:20}}>Loading jobs...</div>
+  if(loading) return <div style={{padding:20}}>Loading...</div>
 
   return (
-    <div style={{padding:20}}>
-      <h2>Available Jobs - Unlock with 100 to 0116982197</h2>
+    <div style={{padding:15, background:'#f5f5f5', minHeight:'100vh', fontFamily:'Arial'}}>
+      <h2>Jobs - Unlock with KES 100 to 0116982197</h2>
+      
       {jobs.map((job:any)=>(
-        <div key={job.id} style={{border:'1px solid #ddd', padding:15, margin:'10px 0', borderRadius:10, background:'white'}}>
-          <h3>{job.title}</h3>
-          <p>💰 Pay: {job.pay}</p>
+        <div key={job.id} style={{border:'1px solid #ddd', padding:15, margin:'12px 0', borderRadius:12, background:'white'}}>
+          <h3 style={{margin:'0 0 5px 0'}}>{job.title || 'Job '+job.id}</h3>
+          <p style={{margin:'5px 0'}}>💰 {job.pay || 'KES 300'}</p>
+          <p style={{margin:'5px 0', fontSize:13, color:'#666'}}>{job.description || ''}</p>
           
-          {/* PHONE - Locked or Unlocked */}
           {job.paid ? (
-            <div style={{background:'#e8f5e9', padding:10, borderRadius:8}}>
-              <b>📱 Phone: {job.phone}</b> <span style={{color:'green'}}>✅ Unlocked</span>
+            <div style={{background:'#e8f5e9', padding:12, borderRadius:8, border:'1px solid green'}}>
+              <b>📱 {job.phone}</b> <span style={{color:'green', fontWeight:'bold'}}>✅ UNLOCKED - Paid 100</span>
+              <br/><a href={`tel:${job.phone}`} style={{background:'green', color:'white', padding:'8px 15px', borderRadius:8, textDecoration:'none', display:'inline-block', marginTop:8}}>📞 Call Now</a>
             </div>
           ) : job.pending ? (
-            <div style={{background:'#fff3e0', padding:10, borderRadius:8}}>
+            <div style={{background:'#fff3e0', padding:12, borderRadius:8, border:'1px solid orange'}}>
               <b>⏳ Pending Verification</b><br/>
-              Payer: {job.payerPhone}<br/>
-              Admin checking SMS to 0116982197...<br/>
-              <small>If you sent 100, you will be unlocked soon. If 50, rejected.</small>
+              Your phone: {job.payerPhone}<br/>
+              Sent 100 to 0116982197<br/>
+              <small>Admin checking M-Pesa SMS. Wait 2 mins then refresh.</small><br/>
+              <button onClick={()=>window.location.reload()} style={{marginTop:8, padding:'8px 15px', borderRadius:8, border:'1px solid orange', background:'white'}}>🔄 Refresh Status</button>
             </div>
           ) : (
-            <div>
-              <div style={{background:'#ffebee', padding:10, borderRadius:8, marginBottom:10}}>
-                <b>📱 Phone: {maskPhone(job.phone)}</b> 🔒 Locked<br/>
-                <small>Send 100 via SEND MONEY to unlock</small>
+            <>
+              <div style={{background:'#ffebee', padding:12, borderRadius:8, marginBottom:10, border:'1px solid #ff5252'}}>
+                <b>📱 {maskPhone(job.phone)} 🔒</b><br/>
+                <small>Unlock with KES 100 via SEND MONEY</small>
               </div>
 
               {showMpesa===job.id ? (
-                <div style={{background:'#f5f5f5', padding:15, borderRadius:10}}>
-                  <p><b>Send KES 100 via SEND MONEY to:</b></p>
-                  <h2 style={{color:'green', textAlign:'center'}}>0116982197</h2>
-                  <p style={{textAlign:'center'}}>Name will show on M-Pesa</p>
+                <div style={{background:'#f5f5f5', padding:15, borderRadius:10, border:'2px dashed green'}}>
+                  <p style={{textAlign:'center', fontWeight:'bold'}}>Send KES 100 via SEND MONEY to:</p>
+                  <h1 style={{color:'green', textAlign:'center', margin:'10px 0'}}>0116982197</h1>
                   
                   <input 
-                    placeholder="Your M-Pesa phone that sent (07XX...)" 
+                    placeholder="Your M-Pesa phone 07XX..." 
                     value={payerPhone}
                     onChange={e=>setPayerPhone(e.target.value)}
-                    style={{width:'100%', padding:12, borderRadius:8, border:'1px solid #ccc', margin:'10px 0'}}
+                    style={{width:'100%', padding:12, borderRadius:8, border:'1px solid #ccc', margin:'10px 0', boxSizing:'border-box'}}
                   />
 
-                  <button onClick={()=>iHavePaid(job)} style={{background:'green', color:'white', padding:'12px', width:'100%', border:'none', borderRadius:8, fontWeight:'bold'}}>
+                  <button onClick={()=>iHavePaid(job)} style={{background:'green', color:'white', padding:'14px', width:'100%', border:'none', borderRadius:8, fontWeight:'bold', fontSize:16}}>
                     I HAVE PAID 100 TO 0116982197
                   </button>
-                  <button onClick={()=>setShowMpesa(null)} style={{background:'gray', color:'white', padding:'8px', width:'100%', border:'none', borderRadius:8, marginTop:5}}>
+                  <button onClick={()=>{setShowMpesa(null); setPayerPhone("")}} style={{background:'white', color:'black', padding:'10px', width:'100%', border:'1px solid #ccc', borderRadius:8, marginTop:8}}>
                     Cancel
                   </button>
                 </div>
               ) : (
-                <button onClick={()=>setShowMpesa(job.id)} style={{background:'black', color:'white', padding:'12px 20px', border:'none', borderRadius:8, fontWeight:'bold', width:'100%'}}>
+                <button onClick={()=>setShowMpesa(job.id)} style={{background:'black', color:'white', padding:'14px 20px', border:'none', borderRadius:10, fontWeight:'bold', width:'100%', fontSize:16}}>
                   🔓 Unlock Number - KES 100
                 </button>
               )}
-            </div>
+            </>
           )}
         </div>
       ))}
