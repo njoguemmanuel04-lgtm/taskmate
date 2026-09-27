@@ -19,28 +19,18 @@ export default function Home() {
           </div>
         </div>
 
-        {/* SEARCH */}
         <div className="bg-white rounded-full p-2 flex items-center mt-5">
-          <input
-            placeholder="Search..."
-            className="flex-1 px-4 text-black outline-none bg-transparent"
-          />
-          <button className="bg-[#0a1931] text-white px-6 py-3 rounded-full font-bold">
-            Search
-          </button>
+          <input placeholder="Search..." className="flex-1 px-4 text-black outline-none bg-transparent" />
+          <button className="bg-[#0a1931] text-white px-6 py-3 rounded-full font-bold">Search</button>
         </div>
 
-        {/* BLUE BANNER */}
         <div className="bg-[#2d6bff] rounded-[20px] p-5 mt-5">
           <h2 className="text-xl font-black">Trusted Services Across Kenya</h2>
           <p className="text-sm opacity-90 mt-1">Skilled workers • Secure payments</p>
-          <Link href="/jobs" className="bg-white text-black inline-block px-5 py-2.5 rounded-full font-black mt-3">
-            + Post a Job
-          </Link>
+          <Link href="/jobs" className="bg-white text-black inline-block px-5 py-2.5 rounded-full font-black mt-3">+ Post a Job</Link>
         </div>
       </div>
 
-      {/* POPULAR CATEGORIES */}
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-black text-xl text-[#0a1931]">Popular Categories</h2>
@@ -77,21 +67,20 @@ export default function Home() {
             <p className="font-black mt-3">Cars Sale</p>
             <p className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full mt-1">NEW!</p>
           </Link>
-          <Link href="/lands" className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm border-2 border-green-500">
+          <Link href="/lands" className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm border-2 border-green-600">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-xl">🏞️</div>
             <p className="font-black mt-3">Lands</p>
-            <p className="text-[10px] text-green-600">TILL 1754910</p>
+            <p className="text-[10px] bg-green-600 text-white px-2 py-0.5 rounded-full mt-1 font-bold">0116982197</p>
           </Link>
         </div>
 
         <Link href="/lands" className="bg-white border-2 border-[#0a6b2a] rounded-[20px] p-5 mt-4 flex flex-col items-center text-center block">
-          <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full">LAND</span>
+          <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold">LAND</span>
           <h3 className="font-black text-xl mt-2">Selling Land</h3>
-          <p className="text-xs mt-1 opacity-70">TILL 1754910 • Seller 500 | Buyer 300 | Broker FREE</p>
+          <p className="text-xs mt-1 font-bold">Send Money 0116982197 • Seller 500 | Buyer 300 | Broker FREE</p>
         </Link>
       </div>
 
-      {/* BOTTOM NAV - ADMIN REMOVED! */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center py-3 px-2">
         <Link href="/" className="flex flex-col items-center"><span>🏠</span><span className="text-xs font-bold">Home</span></Link>
         <Link href="/jobs" className="flex flex-col items-center"><span>💼</span><span className="text-xs">Jobs</span></Link>
