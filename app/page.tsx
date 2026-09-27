@@ -48,50 +48,35 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {/* Cleaning */}
           <div className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm">
             <div className="w-12 h-12 bg-[#00d084] rounded-xl flex items-center justify-center text-white font-bold text-xl">C</div>
             <p className="font-bold mt-3">Cleaning</p>
           </div>
-
-          {/* Delivery */}
           <div className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm">
             <div className="w-12 h-12 bg-[#ff7a00] rounded-xl flex items-center justify-center text-white font-bold text-xl">D</div>
             <p className="font-bold mt-3">Delivery</p>
           </div>
-
-          {/* Repairs */}
           <div className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm">
             <div className="w-12 h-12 bg-[#ff2d2d] rounded-xl flex items-center justify-center text-white font-bold text-xl">R</div>
             <p className="font-bold mt-3">Repairs</p>
           </div>
-
-          {/* Plumbing */}
           <div className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm">
             <div className="w-12 h-12 bg-[#2d8cff] rounded-xl flex items-center justify-center text-white font-bold text-xl">P</div>
             <p className="font-bold mt-3">Plumbing</p>
           </div>
-
-          {/* Construction */}
           <div className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm">
             <div className="w-12 h-12 bg-[#a259ff] rounded-xl flex items-center justify-center text-white font-bold text-xl">C</div>
             <p className="font-bold mt-3">Construction</p>
           </div>
-
-          {/* Outside Catering */}
           <div className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm">
             <div className="w-12 h-12 bg-[#ffbe00] rounded-xl flex items-center justify-center text-white font-bold text-xl">O</div>
             <p className="font-bold mt-3 text-sm text-center">Outside Catering</p>
           </div>
-
-          {/* CARS - NEW! */}
           <Link href="/cars" className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm border-2 border-black">
             <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center text-xl">🚗</div>
             <p className="font-black mt-3">Cars Sale</p>
             <p className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full mt-1">NEW!</p>
           </Link>
-
-          {/* LANDS */}
           <Link href="/lands" className="bg-white p-6 rounded-[20px] flex flex-col items-center shadow-sm border-2 border-green-500">
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-xl">🏞️</div>
             <p className="font-black mt-3">Lands</p>
@@ -99,7 +84,6 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* SELLING LAND BANNER - Like your screenshot */}
         <Link href="/lands" className="bg-white border-2 border-[#0a6b2a] rounded-[20px] p-5 mt-4 flex flex-col items-center text-center block">
           <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full">LAND</span>
           <h3 className="font-black text-xl mt-2">Selling Land</h3>
@@ -107,13 +91,13 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* BOTTOM NAV */}
+      {/* BOTTOM NAV - ADMIN REMOVED! */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center py-3 px-2">
-        <Link href="/" className="flex flex-col items-center"><span>🏠</span><span className="text-xs">Home</span></Link>
+        <Link href="/" className="flex flex-col items-center"><span>🏠</span><span className="text-xs font-bold">Home</span></Link>
         <Link href="/jobs" className="flex flex-col items-center"><span>💼</span><span className="text-xs">Jobs</span></Link>
         <Link href="/jobs" className="w-12 h-12 bg-[#0a1931] rounded-full flex items-center justify-center text-white text-2xl">+</Link>
         <Link href="/cars" className="flex flex-col items-center"><span>🚗</span><span className="text-xs">Cars</span></Link>
-        <Link href="/admin" className="flex flex-col items-center"><span>👤</span><span className="text-xs">Admin</span></Link>
+        <Link href="/lands" className="flex flex-col items-center"><span>🏞️</span><span className="text-xs">Lands</span></Link>
       </div>
     </div>
   );
