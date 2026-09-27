@@ -1,93 +1,158 @@
-"use client"
-import { useState, useEffect } from "react"
+"use client";
+import { useState, useEffect } from "react";
 
-export default function Admin(){
-  const [jobs,setJobs]=useState<any[]>([])
-  const [filter,setFilter]=useState("pending")
+export default function AdminPage(){
+  const [jobs,setJobs]=useState<any[]>([]);
+  const [lands,setLands]=useState<any[]>([]);
+  const [tab,setTab]=useState("pending");
 
-  useEffect(()=>{ load() },[])
+  useEffect(()=>{
+    // Jobs - try all possible keys
+    const j = JSON.parse(localStorage.getItem("taskmate_jobs")||localStorage.getItem("jobs")||localStorage.getItem("allJobs")||"[]");
+    const j2 = JSON.parse(localStorage.getItem("taskmate_requests")||"[]");
+    const allJobs = j.length>0 ? j : j2;
+    setJobs(allJobs);
 
-  async function load(){
-    const res = await fetch('/api/jobs')
-    const data = await res.json()
-    setJobs(data)
-  }
+    const l = JSON.parse(localStorage.getItem("taskmate_lands")||"[]");
+    setLands(l);
+  },[]);
 
-  const pendingJobs = jobs.filter(j=>j.pending)
-  const paidJobs = jobs.filter(j=>j.paid)
-  const totalEarnings = paidJobs.length * 100
+  const refresh=()=>location.reload();
 
-  async function unlock(job:any){
-    const ok = confirm(`Confirm you received Ksh100 from ${job.payerphone} to 0116982197?\n\nCheck M-Pesa SMS first!\n\nIf YES = Unlock\nIf SMS says 50 = Cancel`)
-    if(!ok) return
+  // JOBS ACTIONS
+  const unlockJob=(id:any)=>{
+    const u=jobs.map((j:any)=>j.id===id?{...j,status:"paid",paid:true}:j);
+    localStorage.setItem("taskmate_jobs",JSON.stringify(u));
+    localStorage.setItem("jobs",JSON.stringify(u));
+    localStorage.setItem("taskmate_requests",JSON.stringify(u));
+    setJobs(u);
+    alert("✅ Job Unlocked!");
+  };
+  const rejectJob=(id:any)=>{
+    const u=jobs.map((j:any)=>j.id===id?{...j,status:"pending",paid:false}:j);
+    localStorage.setItem("taskmate_jobs",JSON.stringify(u));
+    localStorage.setItem("jobs",JSON.stringify(u));
+    localStorage.setItem("taskmate_requests",JSON.stringify(u));
+    setJobs(u);
+  };
+  const deleteJob=(id:any)=>{
+    if(!confirm("DELETE this job permanently?")) return;
+    const u=jobs.filter((j:any)=>j.id!==id);
+    localStorage.setItem("taskmate_jobs",JSON.stringify(u));
+    localStorage.setItem("jobs",JSON.stringify(u));
+    localStorage.setItem("taskmate_requests",JSON.stringify(u));
+    setJobs(u);
+  };
 
-    await fetch('/api/jobs',{
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ id: job.id, paid: true, pending: false })
-    })
-    alert(`✅ Unlocked ${job.payerphone} - Ksh100 Confirmed`)
-    load()
-  }
+  // LANDS ACTIONS
+  const approveLand=(id:any)=>{
+    const u=lands.map((l:any)=>l.id===id?{...l,status:"unlocked"}:l);
+    localStorage.setItem("taskmate_lands",JSON.stringify(u));
+    setLands(u);
+    alert("✅ Land Approved!");
+  };
+  const rejectLand=(id:any)=>{
+    const u=lands.map((l:any)=>l.id===id?{...l,status:"locked",buyerCode:""}:l);
+    localStorage.setItem("taskmate_lands",JSON.stringify(u));
+    setLands(u);
+  };
+  const deleteLand=(id:any)=>{
+    if(!confirm("DELETE this land permanently?")) return;
+    const u=lands.filter((l:any)=>l.id!==id);
+    localStorage.setItem("taskmate_lands",JSON.stringify(u));
+    setLands(u);
+  };
 
-  async function reject(job:any){
-    const ok = confirm(`Reject ${job.payerphone}? Only got 50?`)
-    if(!ok) return
+  const pendingJobs=jobs.filter((j:any)=>!j.paid && j.status!=="paid");
+  const paidJobs=jobs.filter((j:any)=>j.paid || j.status==="paid");
+  const pendingLands=lands.filter((l:any)=>l.status==="pending");
+  const paidLands=lands.filter((l:any)=>l.status==="unlocked");
 
-    await fetch('/api/jobs',{
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ id: job.id, pending: false, payerphone: null, pay: "50" })
-    })
-    alert(`❌ Rejected ${job.payerphone} - Only 50`)
-    load()
-  }
+  return(
+    <div className="min-h-screen bg-gray-100 p-3 max-w-md mx-auto">
+      <h1 className="font-black">🔑 Admin - Taskmate SEND MONEY</h1>
+      <p className="text-green-700 font-bold text-sm">M-Pesa: 0116982197 (Send Money - Check SMS)</p>
 
-  const displayJobs = filter==="pending" ? pendingJobs : filter==="paid" ? paidJobs : jobs
-
-  return (
-    <div style={{padding:15, background:'#f5f5f5', minHeight:'100vh'}}>
-      <h2>🔑 Admin - Taskmate SEND MONEY</h2>
-      <p style={{color:'green', fontWeight:'bold'}}>M-Pesa: 0116982197 (Send Money - Check SMS)</p>
-
-      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:10, margin:'15px 0'}}>
-        <div style={{background:'white', padding:15, borderRadius:10}}>Total Jobs: <b>{jobs.length}</b></div>
-        <div style={{background:'orange', padding:15, borderRadius:10, color:'white'}}>Pending: <b>{pendingJobs.length}</b></div>
-        <div style={{background:'#22c55e', padding:15, borderRadius:10, color:'white'}}>Paid: <b>{paidJobs.length}</b></div>
-        <div style={{background:'black', padding:15, borderRadius:10, color:'white'}}>Earnings: <b>Ksh {totalEarnings}</b></div>
+      {/* STATS */}
+      <div className="grid grid-cols-4 gap-2 mt-3">
+        <div className="bg-white p-3 rounded-xl text-sm">Total Jobs: <b>{jobs.length + lands.length}</b><br/>Jobs: {jobs.length} Land: {lands.length}</div>
+        <div className="bg-orange-400 text-white p-3 rounded-xl text-sm">Pending: <b>{pendingJobs.length + pendingLands.length}</b></div>
+        <div className="bg-green-500 text-white p-3 rounded-xl text-sm">Paid: <b>{paidJobs.length + paidLands.length}</b></div>
+        <div className="bg-black text-white p-3 rounded-xl text-sm">Earnings: <b>Ksh {(paidJobs.length*100)+(paidLands.length*500)}</b></div>
       </div>
 
-      <div style={{display:'flex', gap:10, marginBottom:15}}>
-        <button onClick={()=>setFilter("pending")} style={{flex:1, padding:12, background: filter==="pending"?'orange':'white', borderRadius:8}}>⏳ Pending Verify 100 vs 50</button>
-        <button onClick={()=>setFilter("paid")} style={{flex:1, padding:12, background: filter==="paid"?'#22c55e':'white', borderRadius:8}}>✅ Paid 100</button>
-        <button onClick={()=>setFilter("all")} style={{flex:1, padding:12, background: filter==="all"?'black':'white', color: filter==="all"?'white':'black', borderRadius:8}}>All Jobs</button>
-        <button onClick={load} style={{flex:1, padding:12, background:'#3b82f6', color:'white', borderRadius:8}}>🔄 Refresh</button>
+      {/* TABS */}
+      <div className="grid grid-cols-4 gap-2 mt-3">
+        <button onClick={()=>setTab("pending")} className={`p-3 rounded-xl text-sm ${tab==="pending"?"bg-orange-400 text-white":"bg-white"}`}>⏳ Pending Verify<br/><b>{pendingJobs.length + pendingLands.length}</b> vs 50</button>
+        <button onClick={()=>setTab("paid")} className={`p-3 rounded-xl text-sm ${tab==="paid"?"bg-green-500 text-white":"bg-white"}`}>✅ Paid<br/><b>{paidJobs.length + paidLands.length}</b></button>
+        <button onClick={()=>setTab("all")} className={`p-3 rounded-xl text-sm ${tab==="all"?"bg-black text-white":"bg-black text-white"}`}>All Jobs</button>
+        <button onClick={refresh} className="bg-blue-500 text-white p-3 rounded-xl text-sm">🔄 Refresh</button>
       </div>
 
-      <h3>⏳ Pending - Check M-Pesa SMS to 0116982197</h3>
+      <p className="mt-4 font-bold">⏳ Pending - Check M-Pesa SMS to 0116982197</p>
 
-      {displayJobs.map((job:any)=>(
-        <div key={job.id} style={{background:'white', padding:15, marginBottom:12, borderRadius:12, borderLeft:'5px solid orange'}}>
-          <div>📱 <b>Payer Phone:</b> {job.payerphone || 'N/A'}</div>
-          <div>📝 <b>Job:</b> {job.title}</div>
-          <div>⏰ <b>Time:</b> {new Date(job.created_at).toLocaleString()}</div>
-
-          <div style={{background:'#fef3c7', padding:12, marginTop:10, borderRadius:8}}>
-            👉 <b>CHECK SMS:</b> Search M-Pesa SMS for<br/>
-            Did you get <b>Ksh100.00</b> from <b>{job.payerphone}</b> to <b>0116982197</b>?<br/>
-            If SMS shows 100 → UNLOCK<br/>
-            If SMS shows 50 → REJECT
+      {/* PENDING JOBS */}
+      {(tab==="pending" || tab==="all") && pendingJobs.map((j:any)=>(
+        <div key={j.id} className="bg-white border-l-4 border-orange-400 p-3 rounded-xl mt-3">
+          <p className="text-sm">📱 <b>Payer Phone:</b> {j.payerPhone||j.phone||"N/A"}</p>
+          <p className="text-sm">📝 <b>Job:</b> {j.jobTitle||j.title||j.job||"Job"}</p>
+          <p className="text-sm">⏰ <b>Time:</b> {j.time||new Date(j.id).toLocaleString()}</p>
+          <div className="bg-yellow-100 p-2 rounded-lg mt-2 text-sm">
+            <p>👉 <b>CHECK SMS:</b> Search M-Pesa SMS for</p>
+            <p>Did you get <b>Ksh100.00</b> from {j.payerPhone||"client"} to <b>0116982197</b>?</p>
+            <p>If SMS shows 100 → UNLOCK</p>
+            <p>If SMS shows 50 → REJECT</p>
           </div>
-
-          {filter!=="paid" && job.pending && (
-            <div style={{marginTop:12, display:'flex', flexDirection:'column', gap:8}}>
-              <button onClick={()=>unlock(job)} style={{background:'#16a34a', color:'white', padding:12, borderRadius:8, fontWeight:'bold'}}>✅ SMS 100 - UNLOCK</button>
-              <button onClick={()=>reject(job)} style={{background:'#dc2626', color:'white', padding:12, borderRadius:8, fontWeight:'bold', width:'fit-content'}}>❌ Only 50 - REJECT</button>
-            </div>
-          )}
-          {job.paid && <div style={{marginTop:10, color:'green', fontWeight:'bold'}}>✅ Unlocked - Paid 100</div>}
+          <div className="flex gap-2 mt-2">
+            <button onClick={()=>unlockJob(j.id)} className="flex-1 bg-green-600 text-white py-2 rounded-lg font-bold">✅ UNLOCK</button>
+            <button onClick={()=>rejectJob(j.id)} className="flex-1 bg-orange-400 text-white py-2 rounded-lg font-bold">❌ REJECT</button>
+            <button onClick={()=>deleteJob(j.id)} className="bg-black text-white px-3 py-2 rounded-lg font-bold">🗑️</button>
+          </div>
         </div>
       ))}
+
+      {/* PENDING LANDS */}
+      {(tab==="pending" || tab==="all") && pendingLands.map((l:any)=>(
+        <div key={l.id} className="bg-white border-l-4 border-orange-400 p-3 rounded-xl mt-3">
+          <img src={l.image} className="w-full h-32 object-cover rounded-lg"/>
+          <p className="text-sm mt-1">📍 <b>{l.loc}</b></p>
+          <p className="text-sm">💰 Code: <b>{l.buyerCode}</b> Owner: {l.phone}</p>
+          <div className="bg-yellow-100 p-2 rounded-lg mt-2 text-sm">
+            <p>👉 <b>CHECK SMS:</b> Did you get <b>Ksh500.00</b> to <b>0116982197</b>?</p>
+            <p>Land: {l.loc}</p>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <button onClick={()=>approveLand(l.id)} className="flex-1 bg-green-600 text-white py-2 rounded-lg font-bold">✅ UNLOCK LAND</button>
+            <button onClick={()=>rejectLand(l.id)} className="flex-1 bg-orange-400 text-white py-2 rounded-lg font-bold">❌ REJECT</button>
+            <button onClick={()=>deleteLand(l.id)} className="bg-black text-white px-3 py-2 rounded-lg font-bold">🗑️</button>
+          </div>
+        </div>
+      ))}
+
+      {/* PAID LIST */}
+      {tab==="paid" && [...paidJobs.map((j:any)=>({...j,type:"job"})), ...paidLands.map((l:any)=>({...l,type:"land"}))].map((item:any)=>(
+        <div key={item.id} className="bg-white border-l-4 border-green-500 p-3 rounded-xl mt-3">
+          <p className="text-sm">{item.type==="job"?"📝 Job:":"🏞️ Land:"} <b>{item.jobTitle||item.loc}</b> - PAID</p>
+          <div className="flex gap-2 mt-2">
+            <button onClick={()=>item.type==="job"?deleteJob(item.id):deleteLand(item.id)} className="bg-black text-white px-3 py-1 rounded-lg text-xs">🗑️ DELETE</button>
+          </div>
+        </div>
+      ))}
+
+      {/* ALL JOBS */}
+      {tab==="all" && jobs.map((j:any)=>(
+        <div key={j.id} className="bg-white p-3 rounded-xl mt-3 flex justify-between items-center">
+          <div className="text-sm"><b>{j.jobTitle||j.title||"Job"}</b> - {j.paid?"PAID":"PENDING"}</div>
+          <button onClick={()=>deleteJob(j.id)} className="bg-black text-white px-3 py-1 rounded-lg text-xs">🗑️ Delete</button>
+        </div>
+      ))}
+      {tab==="all" && lands.map((l:any)=>(
+        <div key={l.id} className="bg-white p-3 rounded-xl mt-3 flex justify-between items-center">
+          <div className="text-sm flex items-center gap-2"><img src={l.image} className="w-10 h-10 rounded object-cover"/><b>{l.loc}</b> - {l.status}</div>
+          <button onClick={()=>deleteLand(l.id)} className="bg-black text-white px-3 py-1 rounded-lg text-xs">🗑️ Delete</button>
+        </div>
+      ))}
+
     </div>
   )
 }
