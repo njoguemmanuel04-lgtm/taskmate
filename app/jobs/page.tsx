@@ -13,8 +13,16 @@ export default function Jobs(){
     if(data) setJobs(data)
   }
   
-  const handlePay = () => {
-    alert("💰 SEND 100 TO 0116982197\n\n1. Go to M-Pesa\n2. Send 100 to 0116982197\n3. Wait for ADMIN to verify\n4. Number will unlock!\n\nAfter sending, WhatsApp Admin: 0116982197")
+  const handlePay = (j:any) => {
+    const first = confirm(`💰 SEND 100 TO 0116982197\n\n1. Go to M-Pesa\n2. Send 100 to 0116982197\n\nPress OK after you read this`)
+    if(first){
+      const second = confirm(`Did you send the 100?\n\nPress OK for "I HAVE PAID"`)
+      if(second){
+        // Mark as paid request in cloud
+        supabase.from("jobs").update({payment_requested:true}).eq("id", j.id).then(()=>load())
+        alert("✅ You clicked I HAVE PAID\n\nWait for ADMIN to verify your payment!\nYou will get the number soon!")
+      }
+    }
   }
 
   return (
@@ -34,12 +42,17 @@ export default function Jobs(){
                 <div className="mt-1 font-bold text-green-700">📞 {j.phone}</div>
                 <a href={`tel:${j.phone}`} className="mt-3 block bg-green-600 text-white text-center py-3 rounded-full font-bold">📞 CALL {j.name} NOW</a>
               </>
+            ) : j.payment_requested ? (
+              <div className="mt-3 bg-yellow-100 border-2 border-yellow-500 rounded-2xl p-3 text-center">
+                <b>⏳ Waiting for Admin Verification</b>
+                <div className="text-xs mt-1">You clicked I HAVE PAID - Admin will verify soon and unlock number!</div>
+              </div>
             ) : (
               <>
                 <div className="mt-1 text-gray-600">📞 07xxxxxxxx <span className="bg-red-100 px-2 py-1 rounded text-xs">🔒 Locked</span></div>
                 <div className="mt-3 bg-orange-50 border-2 border-dashed border-orange-500 rounded-2xl p-3 flex justify-between items-center">
                   <div><b>🔒 Number Locked</b><div className="text-xs">Pay 100 to 0116982197</div></div>
-                  <button onClick={handlePay} className="bg-[#0a1931] text-white px-6 py-2 rounded-full font-bold">PAY</button>
+                  <button onClick={()=>handlePay(j)} className="bg-[#0a1931] text-white px-6 py-2 rounded-full font-bold">PAY</button>
                 </div>
               </>
             )}
