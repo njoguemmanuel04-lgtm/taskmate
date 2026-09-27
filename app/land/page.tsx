@@ -7,7 +7,6 @@ export default function LandPage(){
   const [image,setImage]=useState("");
   const [lands,setLands]=useState<any[]>([]);
   const [showMpesaFor,setShowMpesaFor]=useState<number|null>(null);
-  const [mpesaCode,setMpesaCode]=useState("");
 
   useEffect(()=>{
     const s=JSON.parse(localStorage.getItem("taskmate_lands")||"[]");
@@ -25,7 +24,7 @@ export default function LandPage(){
 
   const submit=()=>{
     if(!loc||!phone||!image){alert("Add Picture, Location and Phone"); return;}
-    const newLand={id:Date.now(),loc,phone,image,status:"locked",buyerCode:""};
+    const newLand={id:Date.now(),loc,phone,image,status:"locked"};
     const updated=[newLand,...lands];
     localStorage.setItem("taskmate_lands",JSON.stringify(updated));
     setLands(updated);
@@ -34,22 +33,20 @@ export default function LandPage(){
   };
 
   const requestUnlock=(id:number)=>{
-    if(!mpesaCode.trim()){alert("Enter M-Pesa Code"); return;}
-    const updated=lands.map(l=>l.id===id?{...l,status:"pending",buyerCode:mpesaCode}:l);
+    const updated=lands.map(l=>l.id===id?{...l,status:"pending"}:l);
     localStorage.setItem("taskmate_lands",JSON.stringify(updated));
     setLands(updated);
     const land = lands.find(l=>l.id===id);
-    const msg = `NEW LAND PAYMENT!%0ALand: ${land?.loc}%0ACode: ${mpesaCode}%0AOwner Phone: ${land?.phone}%0A%0ACheck M-Pesa 0116982197 then approve in Admin`;
+    const msg = `LAND PAYMENT - I PAID!%0ALand: ${land?.loc}%0APlease check your M-Pesa 0116982197%0ATime: ${new Date().toLocaleString()}%0A%0AApprove me in Admin`;
     window.open(`https://wa.me/254116982197?text=${msg}`, '_blank');
     setShowMpesaFor(null);
-    setMpesaCode("");
-    alert("✅ Request Sent to Admin! Wait for approval");
+    alert("✅ Sent to Admin! Admin will verify your M-Pesa to 0116982197 and UNLOCK you");
   };
 
   return(
     <div className="max-w-md mx-auto p-4 bg-gray-50 min-h-screen">
       <h1 className="font-bold text-xl text-center">🏞️ Land For Sale - Embu</h1>
-      <p className="text-center text-xs text-gray-500">Post FREE - Buyer pays 500 to unlock your number</p>
+      <p className="text-center text-xs text-gray-500">Post FREE - Buyer pays 500 to unlock</p>
 
       <div className="bg-white p-4 rounded-xl border mt-4">
         <label className="font-bold">📸 Picture of Shamba</label>
@@ -78,14 +75,13 @@ export default function LandPage(){
                     <div className="bg-yellow-50 p-3 rounded-lg mt-3 text-left border border-yellow-300">
                       <p className="font-bold text-center">SEND MONEY</p>
                       <p className="font-black text-center text-xl text-green-700">Ksh 500 to 0116982197</p>
-                      <div className="text-xs mt-2 bg-white p-2 rounded">
-                        1. M-Pesa → Send Money<br/>
+                      <div className="text-xs mt-2 bg-white p-2 rounded text-center">
+                        1. Go M-Pesa → Send Money<br/>
                         2. To: <b>0116982197</b><br/>
                         3. Amount: <b>500</b><br/>
-                        4. Enter M-Pesa Code below
+                        4. Then Click Below
                       </div>
-                      <input value={mpesaCode} onChange={e=>setMpesaCode(e.target.value)} placeholder="M-Pesa Code e.g QH12ABC..." className="w-full border rounded-lg p-3 mt-2 font-bold"/>
-                      <button onClick={()=>requestUnlock(l.id)} className="w-full bg-green-600 text-white py-3 rounded-lg font-bold mt-2">Submit for Admin Verification</button>
+                      <button onClick={()=>requestUnlock(l.id)} className="w-full bg-green-600 text-white py-3 rounded-lg font-black mt-3 text-lg">✅ I HAVE PAID - VERIFY ME</button>
                       <button onClick={()=>setShowMpesaFor(null)} className="w-full bg-gray-200 py-2 rounded-lg mt-2 text-sm">Cancel</button>
                     </div>
                   ):(
@@ -96,16 +92,15 @@ export default function LandPage(){
 
               {isPending && (
                 <div className="mt-3 bg-orange-100 p-3 rounded-xl text-center border border-orange-300">
-                  <p className="font-bold text-orange-700">⏳ WAITING FOR ADMIN APPROVAL</p>
-                  <p className="text-xs mt-1">Your Code: <b>{l.buyerCode}</b> submitted</p>
-                  <p className="text-xs">Admin is checking M-Pesa 0116982197</p>
-                  <p className="text-xs mt-1">You will get number once approved</p>
+                  <p className="font-bold text-orange-700">⏳ WAITING FOR ADMIN</p>
+                  <p className="text-xs">Admin checking M-Pesa 0116982197</p>
+                  <p className="text-xs">You will be unlocked soon</p>
                 </div>
               )}
 
               {isUnlocked && (
                 <div className="mt-3 bg-green-50 p-3 rounded-xl border border-green-300">
-                  <p className="text-xs text-green-700 font-bold text-center mb-2">✅ PAYMENT VERIFIED</p>
+                  <p className="text-xs text-green-700 font-bold text-center mb-2">✅ VERIFIED BY ADMIN</p>
                   <a href={`tel:${l.phone}`} className="block bg-green-600 text-white text-center py-3 rounded-xl font-black text-lg">📞 Call Owner: {l.phone}</a>
                 </div>
               )}
@@ -113,9 +108,8 @@ export default function LandPage(){
           </div>
         )
       })}
-
       <div className="text-center mt-6">
-        <a href="/admin" className="text-xs text-gray-400 underline">Admin Panel → Verify Payments</a>
+        <a href="/admin" className="text-xs text-gray-400 underline">Admin Panel</a>
       </div>
     </div>
   )
