@@ -1,43 +1,65 @@
 "use client";
-import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+import { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient";
+import Link from "next/link";
 
-export default function Jobs(){
-  const [title,setTitle]=useState("");
-  const [location,setLocation]=useState("");
-  const [budget,setBudget]=useState("");
-  const [phone,setPhone]=useState("");
-  const [jobs,setJobs]=useState<any[]>([]);
+export default function JobsPage(){
+const [jobs,setJobs]=useState<any[]>([]);
+const [loading,setLoading]=useState(true);
 
-  const fetchJobs=async()=>{
-    const {data}=await supabase.from("taskmate_jobs").select("*").order("created_at",{ascending:false});
-    if(data) setJobs(data);
-  }
-  useEffect(()=>{fetchJobs()},[]);
+useEffect(()=>{fetchJobs();},[]);
 
-  const post=async()=>{
-    if(!title||!location||!budget||!phone) return alert("Fill all fields");
-    const {error}=await supabase.from("taskmate_jobs").insert([{title,location,budget,phone,status:"pending"}]);
-    if(error) alert(error.message);
-    else { alert("Job Posted to CLOUD! Never disappears!"); setTitle("");setLocation("");setBudget("");setPhone(""); fetchJobs(); }
-  }
+async function fetchJobs(){
+setLoading(true);
+const {data}=await supabase.from("jobs").select("*").order("created_at",{ascending:false});
+if(data)setJobs(data);
+setLoading(false);
+}
 
-  return <div className="p-4 max-w-md mx-auto pb-20">
-    <h1 className="text-center font-black text-2xl">💼 Jobs - CLOUD</h1>
-    <p className="text-center text-green-600 font-bold text-sm">Jobs saved forever ✅</p>
-    <div className="border p-4 rounded-2xl mt-4 bg-white space-y-3">
-      <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Job Title e.g House Cleaning" className="w-full border-2 p-3 rounded-lg"/>
-      <input value={location} onChange={e=>setLocation(e.target.value)} placeholder="Location e.g Embu" className="w-full border-2 p-3 rounded-lg"/>
-      <input value={budget} onChange={e=>setBudget(e.target.value)} placeholder="Budget Ksh e.g 2000" className="w-full border-2 p-3 rounded-lg"/>
-      <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Your Phone" className="w-full border-2 p-3 rounded-lg"/>
-      <button onClick={post} className="w-full bg-[#0a1931] text-white py-4 rounded-2xl font-black">Post Job to Cloud - FREE</button>
-    </div>
-    <h2 className="font-bold mt-6">Available Jobs ({jobs.length})</h2>
-    {jobs.map((j:any)=><div key={j.id} className="border p-4 rounded-2xl mt-3 bg-white">
-      <p className="font-black text-xl">{j.title}</p>
-      <p className="text-sm mt-1">📍 {j.location} | 💰 {j.budget}</p>
-      <p className="mt-2">📞 <b className="text-green-700">{j.phone}</b></p>
-    </div>)}
-  </div>
+async function requestPay(id:string){
+const {error}=await supabase.from("jobs").update({pay_requested:true}).eq("id",id);
+if(!error){
+alert("Payment request sent! ✅ Wait for admin to verify your payment to 0116982197");
+fetchJobs();
+}
+}
+
+return(
+<div className="min-h-screen bg-[#eef2f7] pb-20">
+<div className="bg-[#0a1931] text-white p-5 flex gap-3 items-center">
+<Link href="/" className="text-2xl">←</Link>
+<h1 className="font-black text-xl">Jobs - Pay to Unlock</h1>
+</div>
+
+<div className="p-4">
+{loading?<p className="text-center mt-10 font-bold">Loading cloud... ☁️</p>:jobs.map((j:any)=>(
+<div key={j.id} className="bg-white rounded-[20px] p-4 mb-3 border shadow-sm">
+<h3 className="font-black">{j.title}</h3>
+<p className="text-sm opacity-70">📍 {j.location} | 💰 {j.budget}</p>
+
+{j.unlocked?(
+<div className="mt-3 bg-green-50 border-2 border-green-600 rounded-xl p-3 flex justify-between items-center">
+<span className="font-black text-green-800">📞 {j.phone}</span>
+<a href={`tel:${j.phone}`} className="bg-green-600 text-white px-4 py-2 rounded-full font-black text-xs">Call Now</a>
+</div>
+): j.pay_requested?(
+<div className="mt-3 bg-yellow-50 border-2 border-yellow-500 rounded-xl p-3 text-center">
+<p className="font-black text-yellow-800 text-sm">⏳ Waiting for admin to verify...</p>
+<p className="text-[11px] mt-1">You paid to 0116982197 - Admin will unlock soon</p>
+</div>
+):(
+<div className="mt-3 bg-[#f0f2f5] border-2 border-dashed border-orange-500 rounded-xl p-3 flex justify-between items-center">
+<div>
+<p className="font-black text-xs">🔒 Locked - Pay to Unlock</p>
+<p className="text-[11px]">Send 100 to 0116982197</p>
+</div>
+<button onClick={()=>requestPay(j.id)} className="bg-[#0a1931] text-white px-5 py-2 rounded-full font-black text-xs">PAY</button>
+</div>
+)}
+
+</div>
+))}
+</div>
+</div>
+);
 }
