@@ -17,28 +17,24 @@ export default function PostJob(){
     const clientName = f.clientName.value.trim()
     const category = f.category.value
     const phone = f.phone.value.trim()
-    const location = f.location.value.trim()
-    
-    console.log({clientName, category, phone, location})
     
     const {error}=await supabase.from("jobs").insert([{
       name: clientName, 
       category: category, 
       phone: phone, 
-      location: location
+      location: "-" // No location needed
     }])
-    if(error){ alert("CLOUD ERROR: "+error.message); setLoading(false); return }
-    alert(`✅ SAVED! Name=${clientName} Location=${location}`)
+    if(error){ alert("ERROR: "+error.message); setLoading(false); return }
+    alert(`✅ SAVED! Client=${clientName}`)
     window.location.href="/jobs"
   }
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <h1 className="text-2xl font-bold text-center mb-6">Post a Job - FIXED ✅</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">Post a Job - NO Location ✅</h1>
       <form onSubmit={handle} className="bg-white p-6 rounded-2xl shadow max-w-md mx-auto space-y-4">
         <div><label className="font-bold">Client Name</label><input name="clientName" required placeholder="e.g. Ann" className="w-full p-3 rounded-xl border mt-1" /></div>
         <div><label className="font-bold">Job Type</label><select name="category" className="w-full p-3 rounded-xl border mt-1 font-bold">{jobCats.map(c=><option key={c}>{c}</option>)}</select></div>
         <div><label className="font-bold">Phone Number</label><input name="phone" required placeholder="0116982197" className="w-full p-3 rounded-xl border mt-1" /></div>
-        <div><label className="font-bold">Location</label><input name="location" required placeholder="e.g. Keno, Kirinyaga" className="w-full p-3 rounded-xl border mt-1" /></div>
         <button className="w-full bg-black text-white p-4 rounded-xl font-bold">{loading?"Saving...":"Post to CLOUD"}</button>
       </form>
     </div>
