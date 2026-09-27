@@ -14,21 +14,31 @@ export default function PostJob(){
     e.preventDefault()
     setLoading(true)
     const f=e.target
+    const clientName = f.clientName.value.trim()
+    const category = f.category.value
+    const phone = f.phone.value.trim()
+    const location = f.location.value.trim()
+    
+    console.log({clientName, category, phone, location})
+    
     const {error}=await supabase.from("jobs").insert([{
-      name:f.name.value, category:f.category.value, phone:f.phone.value, location:f.location.value
+      name: clientName, 
+      category: category, 
+      phone: phone, 
+      location: location
     }])
     if(error){ alert("CLOUD ERROR: "+error.message); setLoading(false); return }
-    alert("✅ SAVED TO CLOUD!")
+    alert(`✅ SAVED! Name=${clientName} Location=${location}`)
     window.location.href="/jobs"
   }
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <h1 className="text-2xl font-bold text-center mb-6">Post a Job - CLOUD ☁️✅</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">Post a Job - FIXED ✅</h1>
       <form onSubmit={handle} className="bg-white p-6 rounded-2xl shadow max-w-md mx-auto space-y-4">
-        <input name="name" required placeholder="Ann" className="w-full p-3 rounded-xl border" />
-        <select name="category" className="w-full p-3 rounded-xl border font-bold">{jobCats.map(c=><option key={c}>{c}</option>)}</select>
-        <input name="phone" required placeholder="0116982197" className="w-full p-3 rounded-xl border" />
-        <input name="location" required placeholder="Keno" className="w-full p-3 rounded-xl border" />
+        <div><label className="font-bold">Client Name</label><input name="clientName" required placeholder="e.g. Ann" className="w-full p-3 rounded-xl border mt-1" /></div>
+        <div><label className="font-bold">Job Type</label><select name="category" className="w-full p-3 rounded-xl border mt-1 font-bold">{jobCats.map(c=><option key={c}>{c}</option>)}</select></div>
+        <div><label className="font-bold">Phone Number</label><input name="phone" required placeholder="0116982197" className="w-full p-3 rounded-xl border mt-1" /></div>
+        <div><label className="font-bold">Location</label><input name="location" required placeholder="e.g. Keno, Kirinyaga" className="w-full p-3 rounded-xl border mt-1" /></div>
         <button className="w-full bg-black text-white p-4 rounded-xl font-bold">{loading?"Saving...":"Post to CLOUD"}</button>
       </form>
     </div>
