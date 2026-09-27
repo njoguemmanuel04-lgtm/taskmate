@@ -7,67 +7,67 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 export default function Admin(){
   const [jobs,setJobs]=useState<any[]>([])
+  const [cars,setCars]=useState<any[]>([])
   const [filter,setFilter]=useState("all")
+
   const load = async () => {
-    const {data} = await supabase.from("jobs").select("*").order("id",{ascending:false})
-    if(data) setJobs(data)
+    const {data:j} = await supabase.from("jobs").select("*").order("id",{ascending:false})
+    const {data:c} = await supabase.from("cars").select("*").order("id",{ascending:false})
+    if(j) setJobs(j)
+    if(c) setCars(c)
   }
   useEffect(()=>{ load() },[])
 
-  const pending = jobs.filter(j=>j.payment_requested && !j.is_unlocked)
-  const paid = jobs.filter(j=>j.is_unlocked)
-
-  const verify = async (id:number) => {
-    await supabase.from("jobs").update({is_unlocked:true, payment_requested:false}).eq("id", id)
+  const verify = async (table:string,id:number,amount:number) => {
+    await supabase.from(table).update({is_unlocked:true}).eq("id",id)
+    alert(`✅ VERIFIED ${amount} KSH! Unlocked!`)
     load()
   }
-  const reject = async (id:number) => {
-    await supabase.from("jobs").update({is_unlocked:false, payment_requested:false}).eq("id", id)
-    alert("Rejected! Fundi will need to pay again")
+  const reject = async (table:string,id:number) => {
+    await supabase.from(table).update({payment_requested:false,is_unlocked:false}).eq("id",id)
+    alert("❌ REJECTED! Must pay again")
     load()
   }
-  const del = async (id:number) => {
-    if(confirm("Delete this job forever?")){
-      await supabase.from("jobs").delete().eq("id", id)
-      load()
-    }
+  const del = async (table:string,id:number) => {
+    if(!confirm("Delete forever?")) return
+    await supabase.from(table).delete().eq("id",id)
+    load()
   }
 
-  const list = filter==="pending" ? pending : filter==="paid" ? paid : jobs
+  const all = [...jobs.map(j=>({...j,t:"jobs",amt:100})), ...cars.map(c=>({...c,t:"cars",title:c.name,amt:300}))]
+  const pending = all.filter((a:any)=>a.payment_requested && !a.is_unlocked)
+  const paid = all.filter((a:any)=>a.is_unlocked)
+  const show = filter==="pending"? pending : filter==="paid"? paid : all
+  const ksh = jobs.filter(j=>j.is_unlocked).length*100 + cars.filter(c=>c.is_unlocked).length*300
 
   return (
-    <div className="min-h-screen bg-[#f2f4f7] p-4">
-      <div className="font-bold text-xl">🔑 Admin - 0116982197</div>
-      <div className="text-green-600 font-bold text-sm">M-Pesa SEND MONEY - Check SMS</div>
-      
-      <div className="grid grid-cols-4 gap-2 mt-4">
-        <div className="bg-white rounded-2xl p-3 font-bold text-sm">Total<br/>Jobs:{jobs.length}<br/>Land:0</div>
-        <div className="bg-orange-500 text-white rounded-2xl p-3 font-bold">Pending<br/>{pending.length}</div>
-        <div className="bg-green-500 text-white rounded-2xl p-3 font-bold">Paid:{paid.length}</div>
-        <div className="bg-black text-white rounded-2xl p-3">Ksh {paid.length*100}</div>
+    <div className="min-h-screen bg-[#eef1f5] p-3">
+      <div className="font-bold text-[20px]">🔑 Admin - 0116982197</div>
+      <div className="text-green-600 font-bold text-[14px]">M-Pesa SEND MONEY - Check SMS</div>
+
+      <div className="grid grid-cols-4 gap-2 mt-3">
+        <div className="bg-white rounded-2xl p-3 border"><div className="text-[13px] font-bold">Total<br/>Jobs:{jobs.length}<br/>Cars:{cars.length}</div></div>
+        <div className="bg-[#ff7a00] rounded-2xl p-3 text-white font-bold">Pending<br/>{pending.length}</div>
+        <div className="bg-[#00d84c] rounded-2xl p-3 text-white font-bold">Paid:{paid.length}</div>
+        <div className="bg-black rounded-2xl p-3 text-white font-bold">Ksh {ksh}</div>
       </div>
 
-      <div className="flex gap-2 mt-4 overflow-auto">
-        <button onClick={()=>setFilter("pending")} className={`px-4 py-2 rounded-full font-bold ${filter==="pending"?"bg-orange-500 text-white":"bg-orange-100"}`}>⏳ Pending {pending.length}</button>
-        <button onClick={()=>setFilter("paid")} className={`px-4 py-2 rounded-full font-bold ${filter==="paid"?"bg-green-500 text-white":"bg-white"}`}>✅ Paid {paid.length}</button>
-        <button onClick={()=>setFilter("all")} className={`px-4 py-2 rounded-full font-bold ${filter==="all"?"bg-black text-white":"bg-black text-white"}`}>All {jobs.length}</button>
-        <button onClick={load} className="px-4 py-2 rounded-full bg-blue-500 text-white">🔄 Refresh</button>
+      <div className="flex gap-2 mt-4">
+        <button onClick={()=>setFilter("pending")} className={`px-4 py-2 rounded-full font-bold ${filter==="pending"?"bg-[#ff7a00] text-white":"bg-white border"}`}>⏳ Pending {pending.length}</button>
+        <button onClick={()=>setFilter("paid")} className={`px-4 py-2 rounded-full font-bold ${filter==="paid"?"bg-green-500 text-white":"bg-white border"}`}>✅ Paid {paid.length}</button>
+        <button onClick={()=>setFilter("all")} className="px-4 py-2 rounded-full font-bold bg-black text-white">All {all.length}</button>
+        <button onClick={load} className="px-4 py-2 rounded-full font-bold bg-[#4a90e2] text-white">🔄 Refresh</button>
       </div>
 
-      <div className="mt-6 space-y-3">
-        {list.map(j=>(
-          <div key={j.id} className="bg-white rounded-2xl p-4 border-2 border-black">
-            <div className="flex justify-between">
-              <div><b>{j.name}</b> - {j.category}<br/><span className="text-sm">{j.phone}</span><br/>
-              {j.payment_requested && !j.is_unlocked && <span className="bg-yellow-200 text-xs px-2 py-1 rounded">⏳ I HAVE PAID</span>}
-              {j.is_unlocked && <span className="bg-green-200 text-xs px-2 py-1 rounded">✅ Paid & Unlocked</span>}
-              {!j.payment_requested && !j.is_unlocked && <span className="bg-gray-200 text-xs px-2 py-1 rounded">🔒 Locked</span>}
-              </div>
-            </div>
+      <div className="mt-4 space-y-3">
+        {show.map((item:any)=>(
+          <div key={item.t+item.id} className="bg-white rounded-2xl p-3 border">
+            <div className="font-bold">{item.title} - {item.location} {item.t==="cars"?`🚗 ${item.price}`:""} - {item.amt}KSH</div>
+            <div className="text-sm">{item.phone} - {item.is_unlocked?"✅ UNLOCKED":item.payment_requested?"⏳ WAITING FOR YOU":"🔒 Locked"}</div>
             <div className="flex gap-2 mt-3">
-              <button onClick={()=>verify(j.id)} className="bg-green-600 text-white px-4 py-2 rounded-full font-bold flex-1">✅ VERIFY</button>
-              <button onClick={()=>reject(j.id)} className="bg-orange-500 text-white px-4 py-2 rounded-full font-bold flex-1">❌ REJECT</button>
-              <button onClick={()=>del(j.id)} className="bg-red-600 text-white px-4 py-2 rounded-full font-bold flex-1">🗑️ DELETE</button>
+              <button onClick={()=>verify(item.t,item.id,item.amt)} className="flex-1 bg-green-600 text-white py-3 rounded-full font-bold">✅ VERIFY</button>
+              <button onClick={()=>reject(item.t,item.id)} className="flex-1 bg-orange-500 text-white py-3 rounded-full font-bold">❌ REJECT</button>
+              <button onClick={()=>del(item.t,item.id)} className="flex-1 bg-red-600 text-white py-3 rounded-full font-bold">🗑️ DELETE</button>
             </div>
           </div>
         ))}
