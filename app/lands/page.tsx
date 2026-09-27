@@ -7,9 +7,7 @@ export default function LandsPage() {
   const [lands, setLands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchLands();
-  }, []);
+  useEffect(() => { fetchLands(); }, []);
 
   async function fetchLands() {
     setLoading(true);
@@ -20,7 +18,6 @@ export default function LandsPage() {
 
   return (
     <div className="min-h-screen bg-[#eef2f7] pb-20">
-      {/* HEADER */}
       <div className="bg-[#0a1931] text-white p-5 flex items-center gap-3">
         <Link href="/" className="text-2xl">←</Link>
         <h1 className="text-xl font-black">Lands - Send Money 0116982197</h1>
@@ -32,13 +29,11 @@ export default function LandsPage() {
           <p className="text-xs mt-1 font-bold">Send Money 0116982197 • Seller 500 | Buyer 300 | Broker FREE</p>
         </div>
 
-        {loading? (
-          <p className="text-center mt-10">Loading from cloud...</p>
-        ) : lands.length === 0? (
+        {loading? <p className="text-center mt-10">Loading from cloud...</p> : lands.length === 0? (
           <div className="text-center mt-10 bg-white p-10 rounded-[20px]">
             <p className="text-5xl">🏞️</p>
             <p className="font-bold mt-3">No lands yet - Cloud is empty</p>
-            <p className="text-sm opacity-60 mt-1">Go to Supabase → lands table → Insert your first land. It will be saved in CLOUD forever!</p>
+            <p className="text-sm opacity-60 mt-1">Go to Supabase → lands table → Insert first land. It will be CLOUD forever!</p>
             <Link href="/" className="bg-[#0a1931] text-white px-6 py-3 rounded-full inline-block mt-4 font-bold">Back Home</Link>
           </div>
         ) : (
@@ -50,10 +45,7 @@ export default function LandsPage() {
                   <h3 className="font-black text-lg">{land.title || land.location}</h3>
                   <p className="text-sm opacity-70 mt-1">{land.location} • {land.size}</p>
                   <p className="font-black text-green-700 text-xl mt-2">KES {land.price}</p>
-                  <p className="text-xs opacity-60 mt-1">Contact: {land.phone}</p>
-                  <a href={`tel:${land.phone}`} className="bg-green-600 text-white w-full block text-center py-3 rounded-full font-black mt-3">
-                    📞 Call Seller
-                  </a>
+                  <a href={`tel:${land.phone}`} className="bg-green-600 text-white w-full block text-center py-3 rounded-full font-black mt-3">📞 Call {land.phone}</a>
                 </div>
               </div>
             ))}
