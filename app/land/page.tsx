@@ -1,49 +1,109 @@
 "use client";
 import { useState, useEffect } from "react";
+
 export default function LandPage(){
-const [role,setRole]=useState("seller");
-const [phone,setPhone]=useState("");
-const [title,setTitle]=useState("");
-const [loc,setLoc]=useState("");
-const [price,setPrice]=useState("");
-const [lands,setLands]=useState<any[]>([]);
-useEffect(()=>{
-const s=JSON.parse(localStorage.getItem("taskmate_lands")||"[]");
-setLands(s);
-},[]);
-const submit=()=>{
-if(!title||!phone||!loc){alert("Fill Title, Location & Phone!");return;}
-const newLand={id:Date.now(),title,loc,price:price||"Negotiable",phone,role,fee:role==="seller"?500:role==="buyer"?300:0,paid:false,date:new Date().toLocaleDateString()};
-const updated=[newLand,...lands];
-localStorage.setItem("taskmate_lands",JSON.stringify(updated));
-setLands(updated);
-if(role==="broker"){alert(`✅ LISTED FREE as Broker!\n${title} @ ${loc}`);}else{alert(`✅ Land Posted: ${title} in ${loc}\n\nLIVE! Pay ${newLand.fee} to TILL 1754910 to show your number!`);}
-setTitle("");setLoc("");setPrice("");setPhone("");
-};
-const markPaid=(id:number)=>{
-const u=lands.map(l=>l.id===id?{...l,paid:true}:l);
-localStorage.setItem("taskmate_lands",JSON.stringify(u));
-setLands(u);
-alert("Marked PAID ✅");
-};
-return(
-<div className="min-h-screen bg-[#f0f4f8] p-3 pb-24">
-<div className="bg-[#0a1f44] text-white p-3 rounded-b-2xl -m-3 mb-3"><span onClick={()=>window.location.href="/"}>← Back</span><b className="ml-3">Selling Land - Fast</b></div>
-<div className="bg-white p-4 rounded-2xl shadow"><div className="font-black text-lg">List Land in 5 Seconds</div><div className="text-xs text-gray-500">No Code • Till 1754910</div>
-<div className="grid grid-cols-3 gap-2 mt-3">
-<button onClick={()=>setRole("seller")} className={`p-3 rounded-xl font-bold border-2 ${role==="seller"?"bg-[#0a1f44] text-white":"bg-white"}`}>Seller<br/><span className="text-[10px]">500</span></button>
-<button onClick={()=>setRole("buyer")} className={`p-3 rounded-xl font-bold border-2 ${role==="buyer"?"bg-blue-600 text-white":"bg-white"}`}>Buyer<br/><span className="text-[10px]">300</span></button>
-<button onClick={()=>setRole("broker")} className={`p-3 rounded-xl font-bold border-2 ${role==="broker"?"bg-orange-500 text-white":"bg-white"}`}>Broker<br/><span className="text-[10px]">FREE</span></button>
-</div></div>
-<div className="bg-white p-3 rounded-2xl mt-3">
-<input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Title e.g. 50x100 Kenol" className="w-full border p-3 rounded-xl mb-2"/>
-<input value={loc} onChange={e=>setLoc(e.target.value)} placeholder="Location e.g. Mwea" className="w-full border p-3 rounded-xl mb-2"/>
-<input value={price} onChange={e=>setPrice(e.target.value)} placeholder="Price e.g. 850k" className="w-full border p-3 rounded-xl mb-2"/>
-<input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="WhatsApp 07..." className="w-full border p-3 rounded-xl mb-2"/>
-<button onClick={submit} className="w-full bg-[#0a1f44] text-white p-4 rounded-xl font-black mt-2">POST LAND NOW - FREE</button>
-</div>
-{lands.length>0 && <div className="mt-4"><div className="font-black mb-2">Posted Lands ({lands.length}) - You can SEE here:</div>
-{lands.map((l:any)=><div key={l.id} className="bg-white p-3 rounded-xl mb-2 border flex justify-between"><div><div className="font-bold">{l.title}</div><div className="text-xs text-gray-600">{l.loc} • KES {l.price}</div><div className="text-xs mt-1">{l.paid?"✅ Paid - "+l.phone:"🔒 Hidden - Pay Till 1754910"}</div></div><div className="text-right"><div className={`text-[10px] px-2 py-1 rounded-full ${l.paid?"bg-green-100":"bg-yellow-100"}`}>{l.paid?"PAID":"UNPAID"}</div>{!l.paid && l.role!=="broker" && <button onClick={()=>markPaid(l.id)} className="text-[10px] bg-[#0a1f44] text-white px-2 py-1 rounded mt-1">I Paid</button>}</div></div>)}</div>}
-</div>
-);
+  const [loc,setLoc]=useState("");
+  const [phone,setPhone]=useState("");
+  const [image,setImage]=useState("");
+  const [lands,setLands]=useState<any[]>([]);
+  const [showMpesaFor, setShowMpesaFor]=useState<number|null>(null);
+  const [mpesaCode, setMpesaCode]=useState("");
+
+  useEffect(()=>{
+    const s=JSON.parse(localStorage.getItem("taskmate_lands")||"[]");
+    setLands(s);
+  },[]);
+
+  const handleImage = (e:any) => {
+    const file = e.target.files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = (ev:any) => setImage(ev.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const submit=()=>{
+    if(!loc||!phone||!image){alert("Add Picture, Location and Phone"); return;}
+    const newLand={id:Date.now(), loc, phone, image, paid:false, code:""};
+    const updated=[newLand,...lands];
+    localStorage.setItem("taskmate_lands",JSON.stringify(updated));
+    setLands(updated);
+    setLoc("");setPhone("");setImage("");
+    alert("✅ Posted FREE! Your number is now LOCKED 🔒");
+  };
+
+  const submitPayment=(id:number)=>{
+    if(!mpesaCode){alert("Enter M-Pesa Code"); return;}
+    const u=lands.map(l=>l.id===id?{...l,paid:true,code:mpesaCode}:l);
+    localStorage.setItem("taskmate_lands",JSON.stringify(u));
+    setLands(u);
+    setShowMpesaFor(null);
+    setMpesaCode("");
+    alert("✅ Code Submitted! Number Unlocked. (Admin will verify 0116982197)");
+  };
+
+  return(
+    <div className="max-w-md mx-auto p-4 bg-gray-50 min-h-screen">
+      <h1 className="font-bold text-xl text-center">Selling Land Fast - FREE</h1>
+      <p className="text-center text-xs text-gray-500">Post FREE, Buyers pay to unlock</p>
+
+      <div className="bg-white p-4 rounded-xl border mt-4 shadow-sm">
+        <label className="font-bold">📸 Picture of Shamba</label>
+        <input type="file" accept="image/*" onChange={handleImage} className="mt-2 w-full text-sm" />
+        {image && <img src={image} className="mt-2 w-full h-48 object-cover rounded-lg"/>}
+
+        <input value={loc} onChange={e=>setLoc(e.target.value)} placeholder="Location e.g Embu - Kangaru" className="w-full border rounded-lg p-3 mt-3"/>
+        <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Your Phone Number" className="w-full border rounded-lg p-3 mt-3"/>
+        <p className="text-xs text-gray-500 mt-1">🔒 Will be locked until buyer pays</p>
+
+        <button onClick={submit} className="w-full bg-[#0A1F44] text-white py-3 rounded-xl font-bold mt-4">
+          Post Now - FREE
+        </button>
+      </div>
+
+      <div className="mt-6">
+        <h2 className="font-bold">Available Lands ({lands.length})</h2>
+        {lands.map(l=>(
+          <div key={l.id} className="border rounded-xl overflow-hidden bg-white mt-3 shadow-sm">
+            <img src={l.image} className="w-full h-56 object-cover"/>
+            <div className="p-3">
+              <p className="font-bold text-sm">📍 {l.loc}</p>
+
+              {/* LOCK THING */}
+              {!l.paid? (
+                <div className="mt-3 bg-gray-100 p-3 rounded-lg border-2 border-dashed">
+                  <p className="text-center font-black text-gray-600">🔒 NUMBER LOCKED 🔒</p>
+                  <p className="text-center text-xs text-gray-500">Pay 500 to unlock owner number</p>
+
+                  {showMpesaFor === l.id? (
+                    <div className="bg-yellow-50 border border-yellow-300 p-3 rounded-lg mt-2">
+                      <p className="font-bold text-sm text-center">SEND MONEY</p>
+                      <p className="font-black text-center text-lg">500 to 0116982197</p>
+                      <p className="text-[10px] mt-2">1. M-Pesa → Send Money<br/>2. To: 0116982197<br/>3. Amount: 500<br/>4. Paste Code Below</p>
+                      <input value={mpesaCode} onChange={e=>setMpesaCode(e.target.value)} placeholder="M-Pesa Code e.g QH..." className="w-full border rounded-lg p-2 mt-2"/>
+                      <button onClick={()=>submitPayment(l.id)} className="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-bold mt-2">
+                        Unlock Now
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={()=>setShowMpesaFor(l.id)} className="w-full bg-[#0A1F44] text-white py-2.5 rounded-lg text-sm font-bold mt-2">
+                      🔓 Unlock Number - 500
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-3 bg-green-50 border border-green-300 p-3 rounded-lg">
+                  <p className="text-center text-xs text-green-700 font-bold">✅ UNLOCKED - Code: {l.code}</p>
+                  <a href={`tel:${l.phone}`} className="mt-2 block bg-green-600 text-white text-center py-3 rounded-lg font-black">
+                    📞 Call Owner: {l.phone}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
