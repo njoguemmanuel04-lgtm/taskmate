@@ -3,7 +3,7 @@ import { useState } from "react"
 import { createClient } from "@supabase/supabase-js"
 
 const supabaseUrl = "https://tvgbluiespttqwptpwlj.supabase.co"
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2Z2JsdWllc3B0dHF3cHRwd2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNzA4MDcsImV4cCI6MjAwNTY0NjgwN30.Pmbgxx45ziJCtjrtt2eEzjDAbiVqzq4lqv0Qjn7iqoc"
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2Z2JsdWllc3B0dHF3cHRwd2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNzA4MDcsImV4cCI6MjEwNTY0NjgwN30.Pmbgxx45ziJCtjrtt2eEzjDAbiVqzq4lqv0Qjn7iqoc"
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const jobCats = ["Plumbing","Cleaning","Painting","Electrical","Delivery","Construction - Mjengo","Carpentry - Fundi","Masonry","Welding","Gardening / Shamba","Cooking / Chef","Outside Catering","Baby Sitting / Nanny","House Help / Maid","Laundry","Moving / Movers","Garbage Collection","Car Wash","Mechanic","Barber / Salon","Tutor / Teacher","Security / Watchman","Photography","DJ / Sound","Tent & Chairs","Bodaboda","Errands"]
@@ -14,9 +14,9 @@ export default function PostJob(){
     e.preventDefault()
     setLoading(true)
     const f=e.target
-    const {data, error}=await supabase.from("jobs").insert([{
+    const {error}=await supabase.from("jobs").insert([{
       name:f.name.value, category:f.category.value, phone:f.phone.value, location:f.location.value
-    }]).select()
+    }])
     if(error){ alert("CLOUD ERROR: "+error.message); setLoading(false); return }
     alert("✅ SAVED TO CLOUD!")
     window.location.href="/jobs"
