@@ -14,24 +14,22 @@ export default function PostJob(){
     e.preventDefault()
     setLoading(true)
     const f=e.target
-    const { data, error } = await supabase.from("jobs").insert([{
-      name:f.name.value, category:f.category.value, phone:f.phone.value, location:f.location.value, description:f.desc.value
+    const {data, error}=await supabase.from("jobs").insert([{
+      name:f.name.value, category:f.category.value, phone:f.phone.value, location:f.location.value
     }]).select()
-    console.log({data, error})
     if(error){ alert("CLOUD ERROR: "+error.message); setLoading(false); return }
-    alert("✅ SAVED TO CLOUD! ID: "+data[0].id)
+    alert("✅ SAVED TO CLOUD!")
     window.location.href="/jobs"
   }
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <h1 className="text-2xl font-bold text-center mb-6">Post a Job - CLOUD ☁️✅</h1>
       <form onSubmit={handle} className="bg-white p-6 rounded-2xl shadow max-w-md mx-auto space-y-4">
-        <input name="name" required placeholder="Mary" className="w-full p-3 rounded-xl border" />
+        <input name="name" required placeholder="Ann" className="w-full p-3 rounded-xl border" />
         <select name="category" className="w-full p-3 rounded-xl border font-bold">{jobCats.map(c=><option key={c}>{c}</option>)}</select>
         <input name="phone" required placeholder="0116982197" className="w-full p-3 rounded-xl border" />
         <input name="location" required placeholder="Keno" className="w-full p-3 rounded-xl border" />
-        <textarea name="desc" required placeholder="Describe job" className="w-full p-3 rounded-xl border" />
-        <button className="w-full bg-black text-white p-4 rounded-xl font-bold">{loading?"Saving to CLOUD...":"Post to CLOUD"}</button>
+        <button className="w-full bg-black text-white p-4 rounded-xl font-bold">{loading?"Saving...":"Post to CLOUD"}</button>
       </form>
     </div>
   )
